@@ -45,20 +45,38 @@ export async function GET(request: Request) {
 // POST endpoint to register new trainee
 export async function POST(request: Request) {
   try {
-    const trainee = await request.json()
-    const supabase = createRouteHandlerClient<Database>({ cookies })
+    const supabase = createRouteHandlerClient({ cookies })
+    const body = await request.json()
 
+    // Insert the trainee data
     const { data, error } = await supabase
       .from('trainees')
-      .insert([trainee])
+      .insert([
+        {
+          name: body.name,
+          email: body.email,
+          birth_date: body.birth_date,
+          phone: body.phone,
+          preferred_position: body.preferred_position,
+          auth_uid: body.auth_uid,
+          status: 'Pending Test'
+        }
+      ])
       .select()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      )
+    }
 
     return NextResponse.json(data[0])
-  } catch (error: any) {
+  } catch (error) {
+    console.error('Server error:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to create trainee' },
+      { error: 'Internal Server Error' },
       { status: 500 }
     )
   }

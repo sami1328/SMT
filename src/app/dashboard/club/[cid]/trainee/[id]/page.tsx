@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import html2canvas from 'html2canvas'
 
 interface TestResult {
   acceleration: number
@@ -258,6 +259,61 @@ export default function TraineeProfile({ params }: { params: { cid: string, id: 
     return 'bg-[#FF0000]'; // Red
   }
 
+  const handleDownloadReport = async () => {
+    try {
+      // Get the pitch visualization element
+      const pitchElement = document.getElementById('pitch-visualization');
+      if (!pitchElement) {
+        console.error('Pitch visualization element not found');
+        return;
+      }
+
+      // Convert the pitch visualization to base64
+      const canvas = await html2canvas(pitchElement);
+      const pitchImage = canvas.toDataURL('image/png');
+
+      // Prepare the data
+      const traineeData = {
+        name: trainee?.name || '',
+        preferred_position: trainee?.preferred_position || '',
+        test_result: trainee?.test_result || {},
+        position_result: trainee?.position_result || {}
+      };
+
+      // Call the API to generate the PDF
+      const response = await fetch('/api/generate-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          traineeData,
+          pitchImage
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      // Get the PDF blob
+      const pdfBlob = await response.blob();
+
+      // Create a download link and trigger the download
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `trainee-report-${traineeData.name}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading report:', error);
+      // You might want to show an error message to the user here
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white text-[#000000] p-6">
@@ -288,16 +344,24 @@ export default function TraineeProfile({ params }: { params: { cid: string, id: 
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#000000] p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-white text-[#000000] p-8">
+      <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">Trainee Profile</h1>
-          <button
-            onClick={() => router.push(`/dashboard/club/${params.cid}`)}
-            className="px-4 py-2 bg-[#F5F5F5] text-[#000000] rounded-lg hover:bg-[#E6E6E6] transition-colors"
-          >
-            Back to Dashboard
-          </button>
+          <h1 className="text-3xl font-bold">Trainee Profile</h1>
+          <div className="flex gap-4">
+            <button
+              onClick={() => router.push(`/dashboard/club/${params.cid}`)}
+              className="px-4 py-2 bg-[#F5F5F5] text-[#000000] rounded-lg hover:bg-[#E6E6E6] transition-colors"
+            >
+              Back to Dashboard
+            </button>
+            <button
+              onClick={handleDownloadReport}
+              className="px-4 py-2 bg-[#14D922] text-white rounded-lg hover:bg-[#10B31A] transition-colors"
+            >
+              Download Report
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -469,7 +533,7 @@ export default function TraineeProfile({ params }: { params: { cid: string, id: 
           <div className="space-y-6">
             <div className="bg-white rounded-lg p-6 border border-[#E6E6E6]">
               <h2 className="text-xl font-semibold mb-4 text-black">Position Visualization</h2>
-              <div className="relative w-full" style={{ paddingBottom: '150%' }}>
+              <div id="pitch-visualization" className="relative w-full" style={{ paddingBottom: '150%' }}>
                 <div className="absolute inset-0 rounded-lg overflow-hidden">
                   {/* Field Background Image */}
                   <Image

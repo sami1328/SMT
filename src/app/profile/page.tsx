@@ -1,25 +1,29 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession()
+  const { user, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (!loading && !user) {
       router.push('/login')
     }
-  }, [status, router])
+  }, [loading, user, router])
 
-  if (status === 'loading') {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8F8F8]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#5DD62C]"></div>
       </div>
     )
+  }
+
+  if (!user) {
+    return null
   }
 
   return (
@@ -30,15 +34,15 @@ export default function ProfilePage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-[#F8F8F8]">Name</label>
-              <p className="mt-1 text-lg text-[#F8F8F8]">{session?.user?.name || 'Not provided'}</p>
+              <p className="mt-1 text-lg text-[#F8F8F8]">{user.name}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#F8F8F8]">Email</label>
-              <p className="mt-1 text-lg text-[#F8F8F8]">{session?.user?.email}</p>
+              <label className="block text-sm font-medium text-[#F8F8F8]">Role</label>
+              <p className="mt-1 text-lg text-[#F8F8F8]">{user.role}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-[#F8F8F8]">User ID</label>
-              <p className="mt-1 text-lg text-[#F8F8F8]">{session?.user?.id}</p>
+              <p className="mt-1 text-lg text-[#F8F8F8]">{user.id}</p>
             </div>
           </div>
         </div>

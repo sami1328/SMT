@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
+import html2canvas from 'html2canvas'
 
 interface Trainee {
-  tid: string
   name: string
-  birth_date: string
   preferred_position: string
-  test_result?: {
+  birth_date: string
+  test_result: {
     acceleration: number
     agility: number
     balance: number
@@ -56,7 +56,7 @@ interface Application {
   trainee: Trainee
 }
 
-export default function ApplicationDetail({ params }: { params: { cid: string; id: string } }) {
+export default function ApplicationDetails({ params }: { params: { cid: string; id: string } }) {
   const [application, setApplication] = useState<Application | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -66,25 +66,27 @@ export default function ApplicationDetail({ params }: { params: { cid: string; i
   const router = useRouter()
 
   useEffect(() => {
-    fetchApplicationDetails()
-  }, [params.id])
+    fetchApplication()
+  }, [])
 
-  const fetchApplicationDetails = async () => {
+  const fetchApplication = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: applicationData, error: applicationError } = await supabase
         .from('club_applications')
         .select(`
           *,
           trainee:trainees(
-            *,
-            test_results(*)
+            name,
+            preferred_position,
+            birth_date,
+            test_result:test_results(*)
           )
         `)
         .eq('id', params.id)
         .single()
 
-      if (error) throw error
-      setApplication(data)
+      if (applicationError) throw applicationError
+      setApplication(applicationData)
     } catch (err) {
       console.error('Error fetching application:', err)
       setError('Failed to load application details')
@@ -96,27 +98,73 @@ export default function ApplicationDetail({ params }: { params: { cid: string; i
   const handleStatusUpdate = async (newStatus: 'Accepted' | 'Rejected') => {
     try {
       setIsSubmitting(true)
-      setError(null)
-
       const { error: updateError } = await supabase
         .from('club_applications')
         .update({
           status: newStatus,
-          feedback: feedback || null,
-          updated_at: new Date().toISOString()
+          feedback: feedback || null
         })
         .eq('id', params.id)
 
       if (updateError) throw updateError
 
-      // Refresh application details
-      await fetchApplicationDetails()
-      router.refresh()
+      // Refresh application data
+      fetchApplication()
+      setFeedback('')
     } catch (err) {
-      console.error('Error updating application:', err)
+      console.error('Error updating application status:', err)
       setError('Failed to update application status')
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleDownloadReport = async () => {
+    try {
+      // Get the pitch visualization element
+      const pitchElement = document.getElementById('pitch-visualization')
+      if (!pitchElement) return
+
+      // Convert pitch visualization to base64
+      const canvas = await html2canvas(pitchElement)
+      const pitchImage = canvas.toDataURL('image/png')
+
+      // Prepare trainee data
+      const traineeData = {
+        name: application?.trainee.name,
+        preferred_position: application?.trainee.preferred_position,
+        test_result: application?.trainee.test_result
+      }
+
+      // Generate PDF report
+      const response = await fetch('/api/generate-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          traineeData,
+          pitchImage
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate report')
+      }
+
+      // Create blob from response and trigger download
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `trainee-report-${application?.trainee.name}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Error downloading report:', error)
+      setError('Failed to download report')
     }
   }
 
@@ -141,170 +189,33 @@ export default function ApplicationDetail({ params }: { params: { cid: string; i
     return (
       <div className="min-h-screen bg-white text-[#000000] p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-[#F44336]">Application not found</div>
+          <p>Application not found.</p>
         </div>
       </div>
     )
   }
 
-  const trainee = application.trainee
-  const testResult = trainee.test_result
-
   return (
     <div className="min-h-screen bg-white text-[#000000] p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Application Details</h1>
-          <button
-            onClick={() => router.back()}
-            className="px-4 py-2 bg-[#F5F5F5] rounded-lg hover:bg-[#E6E6E6] transition-colors"
-          >
-            Back
-          </button>
-        </div>
-
-        {/* Trainee Information */}
-        <div className="bg-white rounded-lg border border-[#E6E6E6] p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Trainee Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-[#555555]">Name</p>
-              <p className="font-medium">{trainee.name}</p>
-            </div>
-            <div>
-              <p className="text-[#555555]">Preferred Position</p>
-              <p className="font-medium">{trainee.preferred_position}</p>
-            </div>
-            <div>
-              <p className="text-[#555555]">Age</p>
-              <p className="font-medium">
-                {new Date().getFullYear() - new Date(trainee.birth_date).getFullYear()} years
-              </p>
-            </div>
-            <div>
-              <p className="text-[#555555]">Application Date</p>
-              <p className="font-medium">
-                {new Date(application.submitted_at).toLocaleDateString()}
-              </p>
-            </div>
+          <h1 className="text-3xl font-bold">Trainee Profile</h1>
+          <div className="flex gap-4">
+            <button
+              onClick={() => router.push(`/dashboard/club/${params.cid}/applications`)}
+              className="px-4 py-2 bg-[#F5F5F5] text-[#000000] rounded-lg hover:bg-[#E6E6E6] transition-colors"
+            >
+              Back to Applications
+            </button>
+            <button
+              onClick={handleDownloadReport}
+              className="px-4 py-2 bg-[#14D922] text-white rounded-lg hover:bg-[#10B31A] transition-colors"
+            >
+              Download Report
+            </button>
           </div>
         </div>
 
-        {/* Test Results */}
-        {testResult && (
-          <div className="bg-white rounded-lg border border-[#E6E6E6] p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">Test Results</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Physical Attributes */}
-              <div className="bg-[#F5F5F5] rounded-lg p-4">
-                <h3 className="font-semibold mb-3">Physical Attributes</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-[#555555]">Acceleration</span>
-                    <span className={testResult.acceleration >= 80 ? 'text-[#14D922]' : testResult.acceleration >= 60 ? 'text-[#FFC107]' : 'text-[#F44336]'}>
-                      {testResult.acceleration}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#555555]">Agility</span>
-                    <span className={testResult.agility >= 80 ? 'text-[#14D922]' : testResult.agility >= 60 ? 'text-[#FFC107]' : 'text-[#F44336]'}>
-                      {testResult.agility}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#555555]">Balance</span>
-                    <span className={testResult.balance >= 80 ? 'text-[#14D922]' : testResult.balance >= 60 ? 'text-[#FFC107]' : 'text-[#F44336]'}>
-                      {testResult.balance}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#555555]">Jumping</span>
-                    <span className={testResult.jumping >= 80 ? 'text-[#14D922]' : testResult.jumping >= 60 ? 'text-[#FFC107]' : 'text-[#F44336]'}>
-                      {testResult.jumping}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Mental Attributes */}
-              <div className="bg-[#F5F5F5] rounded-lg p-4">
-                <h3 className="font-semibold mb-3">Mental Attributes</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-[#555555]">Aggression</span>
-                    <span className={testResult.aggression >= 80 ? 'text-[#14D922]' : testResult.aggression >= 60 ? 'text-[#FFC107]' : 'text-[#F44336]'}>
-                      {testResult.aggression}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#555555]">Composure</span>
-                    <span className={testResult.composure >= 80 ? 'text-[#14D922]' : testResult.composure >= 60 ? 'text-[#FFC107]' : 'text-[#F44336]'}>
-                      {testResult.composure}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#555555]">Vision</span>
-                    <span className={testResult.vision >= 80 ? 'text-[#14D922]' : testResult.vision >= 60 ? 'text-[#FFC107]' : 'text-[#F44336]'}>
-                      {testResult.vision}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Technical Attributes */}
-              <div className="bg-[#F5F5F5] rounded-lg p-4">
-                <h3 className="font-semibold mb-3">Technical Attributes</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-[#555555]">Ball Control</span>
-                    <span className={testResult.ball_control >= 80 ? 'text-[#14D922]' : testResult.ball_control >= 60 ? 'text-[#FFC107]' : 'text-[#F44336]'}>
-                      {testResult.ball_control}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#555555]">Dribbling</span>
-                    <span className={testResult.dribbling >= 80 ? 'text-[#14D922]' : testResult.dribbling >= 60 ? 'text-[#FFC107]' : 'text-[#F44336]'}>
-                      {testResult.dribbling}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#555555]">Passing</span>
-                    <span className={testResult.short_passing >= 80 ? 'text-[#14D922]' : testResult.short_passing >= 60 ? 'text-[#FFC107]' : 'text-[#F44336]'}>
-                      {testResult.short_passing}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Goalkeeper Attributes */}
-              <div className="bg-[#F5F5F5] rounded-lg p-4">
-                <h3 className="font-semibold mb-3">Goalkeeper Attributes</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-[#555555]">Diving</span>
-                    <span className={testResult.gk_diving >= 80 ? 'text-[#14D922]' : testResult.gk_diving >= 60 ? 'text-[#FFC107]' : 'text-[#F44336]'}>
-                      {testResult.gk_diving}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#555555]">Handling</span>
-                    <span className={testResult.gk_handling >= 80 ? 'text-[#14D922]' : testResult.gk_handling >= 60 ? 'text-[#FFC107]' : 'text-[#F44336]'}>
-                      {testResult.gk_handling}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#555555]">Reflexes</span>
-                    <span className={testResult.gk_reflexes >= 80 ? 'text-[#14D922]' : testResult.gk_reflexes >= 60 ? 'text-[#FFC107]' : 'text-[#F44336]'}>
-                      {testResult.gk_reflexes}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Application Status */}
         <div className="bg-white rounded-lg border border-[#E6E6E6] p-6">
           <h2 className="text-xl font-semibold mb-4">Application Status</h2>
           <div className="flex items-center mb-4">

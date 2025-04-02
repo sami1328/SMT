@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/contexts/AuthContext'
 import DashboardLayout from '@/components/DashboardLayout'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import type { Database } from '@/types/database'
@@ -14,7 +14,7 @@ interface TraineeDetailsClientProps {
 
 export default function TraineeDetailsClient({ tid }: TraineeDetailsClientProps) {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { user } = useAuth()
   const [trainee, setTrainee] = useState<Trainee | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -69,21 +69,24 @@ export default function TraineeDetailsClient({ tid }: TraineeDetailsClientProps)
     setLoading(true)
 
     try {
-      const response = await fetch('/api/test-results', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          tid,
-          submitted_by: session?.user?.id || '660e8400-e29b-41d4-a716-446655440003',
-        }),
-      })
+      const supabase = createClientComponentClient<Database>()
+      
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to submit test results');
+      const testResult: TestResult = {
+        ...formData,
+        tid,
+        submitted_by: user.id,
+      }
+
+      const { error: insertError } = await supabase
+        .from('test_results')
+        .insert([testResult])
+
+      if (insertError) {
+        throw new Error(insertError.message)
       }
 
       setSuccessMessage('Test results submitted successfully!')
@@ -123,25 +126,25 @@ export default function TraineeDetailsClient({ tid }: TraineeDetailsClientProps)
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-white p-6">
+      <div className="min-h-screen bg-white p-4 lg:p-6">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg p-6 mb-6 border border-[#E6E6E6]">
-            <h1 className="text-2xl font-bold text-black mb-4">{trainee.name}</h1>
-            <div className="grid grid-cols-2 gap-4 text-[#555555]">
-              <div>
-                <p>Age: {calculateAge(trainee.birth_date)}</p>
-                <p>Position: {trainee.preferred_position}</p>
-                <p>Status: {trainee.status}</p>
+          <div className="bg-white rounded-lg p-4 lg:p-6 mb-4 lg:mb-6 border border-[#E6E6E6]">
+            <h1 className="text-xl lg:text-2xl font-bold text-black mb-4">{trainee.name}</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[#555555]">
+              <div className="space-y-2">
+                <p className="text-sm lg:text-base">Age: {calculateAge(trainee.birth_date)}</p>
+                <p className="text-sm lg:text-base">Position: {trainee.preferred_position}</p>
+                <p className="text-sm lg:text-base">Status: {trainee.status}</p>
               </div>
-              <div>
-                <p>Email: {trainee.email}</p>
-                <p>Phone: {trainee.phone}</p>
+              <div className="space-y-2">
+                <p className="text-sm lg:text-base">Email: {trainee.email}</p>
+                <p className="text-sm lg:text-base">Phone: {trainee.phone}</p>
               </div>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 border border-[#E6E6E6]">
-            <h2 className="text-xl font-bold text-black mb-6">Test Results</h2>
+          <form onSubmit={handleSubmit} className="bg-white rounded-lg p-4 lg:p-6 border border-[#E6E6E6]">
+            <h2 className="text-lg lg:text-xl font-bold text-black mb-6">Test Results</h2>
             
             {/* Form fields for test results */}
             {/* ... existing form fields ... */}
@@ -150,7 +153,7 @@ export default function TraineeDetailsClient({ tid }: TraineeDetailsClientProps)
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#14D922] text-white py-2 px-4 rounded-md hover:bg-[#10B61E] disabled:opacity-50"
+                className="w-full bg-[#14D922] text-white py-2 px-4 rounded-md hover:bg-[#10B61E] disabled:opacity-50 text-sm lg:text-base"
               >
                 {loading ? 'Submitting...' : 'Submit Test Results'}
               </button>

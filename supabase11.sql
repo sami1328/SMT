@@ -4,16 +4,14 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Create trainees table
 CREATE TABLE trainees (
     tid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Trainee ID
+    auth_uid UUID UNIQUE REFERENCES auth.users(id),
     name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
     birth_date DATE NOT NULL,
     phone TEXT NOT NULL,
     preferred_position TEXT NOT NULL,
     status TEXT DEFAULT 'Pending Test',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    password TEXT NOT NULL,
-    auth_uid UUID UNIQUE,
-    final_club_id UUID REFERENCES clubs(cid)
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() 
 );
 
 -- Create clubs table
@@ -25,7 +23,7 @@ CREATE TABLE clubs (
     location TEXT,
     phone TEXT,
     contact_person TEXT,
-    logo_url TEXT,         -- Optional: link to the club's logo in storage
+    logo_url TEXT,         -- Optional: link to the club’s logo in storage
     description TEXT,      -- Optional: club bio/summary
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -114,9 +112,92 @@ CREATE TRIGGER update_club_applications_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
+-- Add RLS policies
+ALTER TABLE club_applications ENABLE ROW LEVEL SECURITY;
+
+-- Allow trainees to view their own applications
+CREATE POLICY "Trainees can view their own applications"
+    ON club_applications FOR SELECT
+    USING (auth.uid() = trainee_uid);
+
+-- Allow trainees to create applications
+CREATE POLICY "Trainees can create applications"
+    ON club_applications FOR INSERT
+    WITH CHECK (auth.uid() = trainee_uid);
+
+-- Allow clubs to view applications for their club
+CREATE POLICY "Clubs can view their applications"
+    ON club_applications FOR SELECT
+    USING (EXISTS (
+        SELECT 1 FROM clubs
+        WHERE clubs.cid = club_applications.club_id
+        AND clubs.cid = auth.uid()
+    ));
+
+-- Allow clubs to update application status
+CREATE POLICY "Clubs can update application status"
+    ON club_applications FOR UPDATE
+    USING (EXISTS (
+        SELECT 1 FROM clubs
+        WHERE clubs.cid = club_applications.club_id
+        AND clubs.cid = auth.uid()
+    ))
+    WITH CHECK (EXISTS (
+        SELECT 1 FROM clubs
+        WHERE clubs.cid = club_applications.club_id
+        AND clubs.cid = auth.uid()
+    ));
+
+-- Add check constraint to ensure trainee has completed test
+CREATE OR REPLACE FUNCTION check_trainee_test_completed()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM trainees
+        WHERE tid = NEW.trainee_uid
+        AND status = 'Test Completed'
+    ) THEN
+        RAISE EXCEPTION 'Trainee must complete test before applying to clubs';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER ensure_trainee_test_completed
+    BEFORE INSERT ON club_applications
+    FOR EACH ROW
+    EXECUTE FUNCTION check_trainee_test_completed();
+
 -- Add comment to table
 COMMENT ON TABLE club_applications IS 'Stores club applications from trainees, including status and feedback';
 
+
+CREATE OR REPLACE FUNCTION check_final_club_selection()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Check if trainee has already selected a final club
+  IF EXISTS (
+    SELECT 1 FROM trainees 
+    WHERE tid = NEW.trainee_uid 
+    AND final_club_id IS NOT NULL
+  ) THEN
+    RAISE EXCEPTION 'Cannot apply to clubs after selecting a final club';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger to prevent applications after final club selection
+CREATE TRIGGER prevent_applications_after_final_club
+BEFORE INSERT ON club_applications
+FOR EACH ROW
+EXECUTE FUNCTION check_final_club_selection();
+
+-- Add RLS policy to enforce this at the database level
+   ALTER TABLE trainees
+   ADD COLUMN final_club_id UUID REFERENCES clubs(cid);
+
+-- Create position_results table
 CREATE TABLE position_results (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Unique identifier for each result
     tid UUID REFERENCES trainees(tid) NOT NULL,      -- Reference to the trainee
@@ -138,10 +219,11 @@ CREATE TABLE position_results (
     notes TEXT                                       -- Additional notes
 );
 
-CREATE TABLE admins (
-  aid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL,
-  email TEXT NOT NULL UNIQUE,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  password TEXT NOT NULL
+CREATE TABLE contact_messages (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  subject VARCHAR(50) NOT NULL,
+  message TEXT NOT NULL,
+  submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
