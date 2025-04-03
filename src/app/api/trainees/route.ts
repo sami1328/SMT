@@ -65,7 +65,6 @@ export async function POST(request: Request) {
       .select()
 
     if (error) {
-      console.error('Supabase error:', error)
       return NextResponse.json(
         { error: error.message },
         { status: 400 }
@@ -74,7 +73,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(data[0])
   } catch (error) {
-    console.error('Server error:', error)
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

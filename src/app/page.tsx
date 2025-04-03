@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 
 export default function Home() {
   return (
@@ -17,76 +18,93 @@ export default function Home() {
       >
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-8 text-white">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-4xl sm:text-5xl md:text-6xl font-bold mb-8 text-white"
+          >
             Welcome to Saql
-          </h1>
-          <p className="text-xl sm:text-2xl mb-12 text-white">
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-xl sm:text-2xl mb-12 text-white"
+          >
             Revolutionizing soccer talent discovery and development through advanced analytics and professional scouting
-          </p>
+          </motion.p>
           
-          {/* Quick Access Dashboard Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-2xl mx-auto">
+          {/* Sign Up Button */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="max-w-2xl mx-auto"
+          >
             <Link 
-              href="/access/trainee"
-              className="bg-[#14D922] hover:bg-[#10B61E] text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+              href="/signup"
+              className="bg-[#14D922] hover:bg-[#10B61E] text-white font-bold py-4 px-8 rounded-lg transition-colors duration-200 inline-flex items-center justify-center gap-2"
             >
-              Trainee Dashboard
+              Get Started
             </Link>
-            <Link 
-              href="/access/club"
-              className="bg-[#14D922] hover:bg-[#10B61E] text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-            >
-              Club Dashboard
-            </Link>
-            <Link 
-              href="/scouter-access"
-              className="bg-[#14D922] hover:bg-[#10B61E] text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-            >
-              Scout Dashboard
-            </Link>
-            <Link 
-              href="/dashboard/admin"
-              className="bg-[#14D922] hover:bg-[#10B61E] text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-            >
-              Admin Dashboard
-            </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* About Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F5F5F5]">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-[#000000]">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-3xl sm:text-4xl font-bold text-center mb-12 text-[#000000]"
+          >
             About Saql
-          </h2>
-          <div className="max-w-4xl mx-auto text-center mb-16">
+          </motion.h2>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto text-center mb-16"
+          >
             <p className="text-lg text-[#555555] mb-8">
               Saql is a comprehensive platform that bridges the gap between talented players, professional scouts, and football clubs. Our mission is to revolutionize how soccer talent is discovered, evaluated, and developed through cutting-edge technology and expert insights.
             </p>
             <p className="text-lg text-[#555555]">
               Whether you're a young player looking to showcase your skills, a scout searching for the next big talent, or a club aiming to strengthen your roster, Saql provides the tools and connections you need to succeed in the modern football landscape.
             </p>
-          </div>
+          </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="text-center">
-              <h3 className="text-xl font-semibold mb-4 text-[#000000]">Precision</h3>
-              <p className="text-[#555555]">
-                Advanced analytics and evaluation tools for accurate talent assessment, powered by data-driven insights and professional standards
-              </p>
-            </div>
-            <div className="text-center">
-              <h3 className="text-xl font-semibold mb-4 text-[#000000]">Efficiency</h3>
-              <p className="text-[#555555]">
-                Streamlined scouting process and data management, making talent discovery and evaluation faster and more effective
-              </p>
-            </div>
-            <div className="text-center">
-              <h3 className="text-xl font-semibold mb-4 text-[#000000]">Excellence</h3>
-              <p className="text-[#555555]">
-                Commitment to discovering and developing top soccer talent through comprehensive evaluation and professional guidance
-              </p>
-            </div>
+            {[
+              {
+                title: "Precision",
+                description: "Advanced analytics and evaluation tools for accurate talent assessment, powered by data-driven insights and professional standards"
+              },
+              {
+                title: "Efficiency",
+                description: "Streamlined scouting process and data management, making talent discovery and evaluation faster and more effective"
+              },
+              {
+                title: "Excellence",
+                description: "Commitment to discovering and developing top soccer talent through comprehensive evaluation and professional guidance"
+              }
+            ].map((item, index) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+                viewport={{ once: true }}
+                className="text-center"
+              >
+                <h3 className="text-xl font-semibold mb-4 text-[#000000]">{item.title}</h3>
+                <p className="text-[#555555]">{item.description}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -94,40 +112,72 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-16 text-[#000000]">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-3xl sm:text-4xl font-bold text-center mb-16 text-[#000000]"
+          >
             What Sets Us Apart
-          </h2>
+          </motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-xl border border-[#E6E6E6]">
-              <h3 className="text-xl font-semibold mb-4 text-[#000000]">For Trainees</h3>
-              <ul className="space-y-3 text-[#555555]">
-                <li>• Create detailed player profiles</li>
-                <li>• Track performance metrics</li>
-                <li>• Access professional development tools</li>
-                <li>• Connect with scouts and clubs</li>
-                <li>• Receive expert feedback</li>
-              </ul>
-            </div>
-            <div className="bg-white p-8 rounded-xl border border-[#E6E6E6]">
-              <h3 className="text-xl font-semibold mb-4 text-[#000000]">For Scouts</h3>
-              <ul className="space-y-3 text-[#555555]">
-                <li>• Advanced search filters</li>
-                <li>• Comprehensive player analytics</li>
-                <li>• Digital scouting reports</li>
-                <li>• Talent tracking system</li>
-                <li>• Direct communication channels</li>
-              </ul>
-            </div>
-            <div className="bg-white p-8 rounded-xl border border-[#E6E6E6]">
-              <h3 className="text-xl font-semibold mb-4 text-[#000000]">For Clubs</h3>
-              <ul className="space-y-3 text-[#555555]">
-                <li>• Talent pipeline management</li>
-                <li>• Team performance analytics</li>
-                <li>• Recruitment tools</li>
-                <li>• Scout network access</li>
-                <li>• Development tracking</li>
-              </ul>
-            </div>
+            {[
+              {
+                title: "For Trainees",
+                items: [
+                  "Create detailed player profiles",
+                  "Track performance metrics",
+                  "Access professional development tools",
+                  "Connect with scouts and clubs",
+                  "Receive expert feedback"
+                ]
+              },
+              {
+                title: "For Scouts",
+                items: [
+                  "Advanced search filters",
+                  "Comprehensive player analytics",
+                  "Digital scouting reports",
+                  "Talent tracking system",
+                  "Direct communication channels"
+                ]
+              },
+              {
+                title: "For Clubs",
+                items: [
+                  "Talent pipeline management",
+                  "Team performance analytics",
+                  "Recruitment tools",
+                  "Scout network access",
+                  "Development tracking"
+                ]
+              }
+            ].map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+                viewport={{ once: true }}
+                className="bg-white p-8 rounded-xl border border-[#E6E6E6]"
+              >
+                <h3 className="text-xl font-semibold mb-4 text-[#000000]">{feature.title}</h3>
+                <ul className="space-y-3 text-[#555555]">
+                  {feature.items.map((item, i) => (
+                    <motion.li
+                      key={i}
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                      viewport={{ once: true }}
+                    >
+                      • {item}
+                    </motion.li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -135,25 +185,70 @@ export default function Home() {
       {/* Stats Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-16 text-[#000000]">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-3xl sm:text-4xl font-bold text-center mb-16 text-[#000000]"
+          >
             Our Growing Community
-          </h2>
+          </motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-[#14D922] mb-2">1000+</div>
-              <div className="text-[#000000]">Active Trainees</div>
-              <p className="text-sm text-[#555555] mt-2">Developing their skills daily</p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-[#14D922] mb-2">200+</div>
-              <div className="text-[#000000]">Professional Scouts</div>
-              <p className="text-sm text-[#555555] mt-2">Finding tomorrow's stars</p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-[#14D922] mb-2">50+</div>
-              <div className="text-[#000000]">Partner Clubs</div>
-              <p className="text-sm text-[#555555] mt-2">Building stronger teams</p>
-            </div>
+            {[
+              {
+                number: "1000+",
+                title: "Active Trainees",
+                subtitle: "Developing their skills daily"
+              },
+              {
+                number: "200+",
+                title: "Professional Scouts",
+                subtitle: "Finding tomorrow's stars"
+              },
+              {
+                number: "50+",
+                title: "Partner Clubs",
+                subtitle: "Building stronger teams"
+              }
+            ].map((stat, index) => (
+              <motion.div
+                key={stat.title}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+                viewport={{ once: true }}
+                className="text-center"
+              >
+                <motion.div 
+                  className="text-4xl font-bold text-[#14D922] mb-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.2 + 0.2 }}
+                  viewport={{ once: true }}
+                >
+                  {stat.number}
+                </motion.div>
+                <motion.div 
+                  className="text-[#000000]"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.2 + 0.3 }}
+                  viewport={{ once: true }}
+                >
+                  {stat.title}
+                </motion.div>
+                <motion.p 
+                  className="text-sm text-[#555555] mt-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.2 + 0.4 }}
+                  viewport={{ once: true }}
+                >
+                  {stat.subtitle}
+                </motion.p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>

@@ -4,7 +4,6 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Create trainees table
 CREATE TABLE trainees (
     tid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- Trainee ID
-    auth_uid UUID UNIQUE REFERENCES auth.users(id),
     name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
     birth_date DATE NOT NULL,
@@ -23,7 +22,7 @@ CREATE TABLE clubs (
     location TEXT,
     phone TEXT,
     contact_person TEXT,
-    logo_url TEXT,         -- Optional: link to the club’s logo in storage
+    logo_url TEXT,         -- Optional: link to the club's logo in storage
     description TEXT,      -- Optional: club bio/summary
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -227,3 +226,31 @@ CREATE TABLE contact_messages (
   message TEXT NOT NULL,
   submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE admins (
+    aid uuid PRIMARY KEY,
+    name text,
+    email text,
+    created_at timestamp with time zone DEFAULT now(),
+    password text 
+);
+
+-- Insert test users for each role (admin, club, scouter)
+-- Each role will have 3 users with different credentials
+
+-- Test Admins
+INSERT INTO admins (aid, email, password, name) VALUES
+(uuid_generate_v4(), 'admin1@saql.com', '$2a$10$YourHashedPasswordHere', 'Admin One'),
+(uuid_generate_v4(), 'admin2@saql.com', '$2a$10$YourHashedPasswordHere', 'Admin Two'),
+(uuid_generate_v4(), 'admin3@saql.com', '$2a$10$YourHashedPasswordHere', 'Admin Three');
+
+-- Test Clubs
+INSERT INTO clubs (cid, email, password, name) VALUES
+(uuid_generate_v4(), 'club1@saql.com', '$2a$10$YourHashedPasswordHere', 'moh FC'),
+(uuid_generate_v4(), 'club2@saql.com', '$2a$10$YourHashedPasswordHere', 'sam FC'),
+(uuid_generate_v4(), 'club3@saql.com', '$2a$10$YourHashedPasswordHere', 'tal FC');
+
+-- Test Scouters
+INSERT INTO scouters (sid, email, password, name) VALUES
+(uuid_generate_v4(), 'scouter1@saql.com', '$2a$10$YourHashedPasswordHere', 'Scouter One'),
+(uuid_generate_v4(), 'scouter2@saql.com', '$2a$10$YourHashedPasswordHere', 'Scouter Two'),
+(uuid_generate_v4(), 'scouter3@saql.com', '$2a$10$YourHashedPasswordHere', 'Scouter Three');
