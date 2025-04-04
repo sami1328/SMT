@@ -531,7 +531,7 @@ export default function TraineeProfile({ params }: { params: { cid: string, id: 
 
           {/* Right Column - Football Field */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 border border-[#E6E6E6]">
+            <div className="bg-white rounded-lg p-4 sm:p-6 border border-[#E6E6E6]">
               <h2 className="text-xl font-semibold mb-4 text-black">Position Visualization</h2>
               <div id="pitch-visualization" className="relative w-full" style={{ paddingBottom: '150%' }}>
                 <div className="absolute inset-0 rounded-lg overflow-hidden">
@@ -556,18 +556,18 @@ export default function TraineeProfile({ params }: { params: { cid: string, id: 
                       return (
                         <div 
                           key={position} 
-                          className="absolute transform -translate-x-1/2 -translate-y-1/2 w-28" 
+                          className="absolute transform -translate-x-1/2 -translate-y-1/2 w-16 sm:w-20 md:w-24 lg:w-28" 
                           style={style}
                         >
                           <div className="flex flex-col items-center">
                             <div 
-                              className="w-full text-center py-2 px-3 rounded-t text-[#1a1a1a] font-bold text-lg"
+                              className="w-full text-center py-1 sm:py-2 px-2 sm:px-3 rounded-t text-[#1a1a1a] font-bold text-xs sm:text-sm md:text-base lg:text-lg"
                               style={{ backgroundColor }}
                             >
                               {position.toUpperCase()}
                             </div>
                             <div 
-                              className="w-full text-center py-2 px-3 text-white font-bold rounded-b text-lg"
+                              className="w-full text-center py-1 sm:py-2 px-2 sm:px-3 text-white font-bold rounded-b text-xs sm:text-sm md:text-base lg:text-lg"
                               style={{ backgroundColor: '#1a1a1a' }}
                             >
                               {scoreValue}

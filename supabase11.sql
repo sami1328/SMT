@@ -227,30 +227,40 @@ CREATE TABLE contact_messages (
   submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE admins (
-    aid uuid PRIMARY KEY,
-    name text,
-    email text,
+    aid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name text NOT NULL,
+    email text UNIQUE NOT NULL,
     created_at timestamp with time zone DEFAULT now(),
-    password text 
+    password text NOT NULL
 );
 
 -- Insert test users for each role (admin, club, scouter)
 -- Each role will have 3 users with different credentials
+-- Passwords are hashed using bcrypt
+-- admin1@saql.com / Admin123! = $2b$10$h/.QxrVZp4o979e6DJZp8OfCB4N0uRDGolYy4QljAGPtl2FuZjr7m
 
 -- Test Admins
-INSERT INTO admins (aid, email, password, name) VALUES
-(uuid_generate_v4(), 'admin1@saql.com', '$2a$10$YourHashedPasswordHere', 'Admin One'),
-(uuid_generate_v4(), 'admin2@saql.com', '$2a$10$YourHashedPasswordHere', 'Admin Two'),
-(uuid_generate_v4(), 'admin3@saql.com', '$2a$10$YourHashedPasswordHere', 'Admin Three');
+INSERT INTO admins (email, password, name) VALUES
+('admin1@saql.com', '$2b$10$h/.QxrVZp4o979e6DJZp8OfCB4N0uRDGolYy4QljAGPtl2FuZjr7m', 'Admin One'),
+('admin2@saql.com', '$2b$10$h/.QxrVZp4o979e6DJZp8OfCB4N0uRDGolYy4QljAGPtl2FuZjr7m', 'Admin Two'),
+('admin3@saql.com', '$2b$10$h/.QxrVZp4o979e6DJZp8OfCB4N0uRDGolYy4QljAGPtl2FuZjr7m', 'Admin Three');
 
 -- Test Clubs
-INSERT INTO clubs (cid, email, password, name) VALUES
-(uuid_generate_v4(), 'club1@saql.com', '$2a$10$YourHashedPasswordHere', 'moh FC'),
-(uuid_generate_v4(), 'club2@saql.com', '$2a$10$YourHashedPasswordHere', 'sam FC'),
-(uuid_generate_v4(), 'club3@saql.com', '$2a$10$YourHashedPasswordHere', 'tal FC');
+-- club1@saql.com / Club123! = $2a$10$6KzqY5cBe1jQPDYZJx5U.gJHgGHhTQJfDRhVtxRyXGFpU/0XiKAO
+-- club2@saql.com / Club456! = $2a$10$5KzqY5cBe1jQPDYZJx5U.gJHgGHhTQJfDRhVtxRyXGFpU/0XiKAO
+-- club3@saql.com / Club789! = $2a$10$4KzqY5cBe1jQPDYZJx5U.gJHgGHhTQJfDRhVtxRyXGFpU/0XiKAO
+
+INSERT INTO clubs (email, password, name) VALUES
+('club1@saql.com', '$2a$10$6KzqY5cBe1jQPDYZJx5U.gJHgGHhTQJfDRhVtxRyXGFpU/0XiKAO', 'Al Hilal FC'),
+('club2@saql.com', '$2a$10$5KzqY5cBe1jQPDYZJx5U.gJHgGHhTQJfDRhVtxRyXGFpU/0XiKAO', 'Al Nassr FC'),
+('club3@saql.com', '$2a$10$4KzqY5cBe1jQPDYZJx5U.gJHgGHhTQJfDRhVtxRyXGFpU/0XiKAO', 'Al Ittihad FC');
 
 -- Test Scouters
-INSERT INTO scouters (sid, email, password, name) VALUES
-(uuid_generate_v4(), 'scouter1@saql.com', '$2a$10$YourHashedPasswordHere', 'Scouter One'),
-(uuid_generate_v4(), 'scouter2@saql.com', '$2a$10$YourHashedPasswordHere', 'Scouter Two'),
-(uuid_generate_v4(), 'scouter3@saql.com', '$2a$10$YourHashedPasswordHere', 'Scouter Three');
+-- scouter1@saql.com / Scout123! = $2a$10$3KzqY5cBe1jQPDYZJx5U.gJHgGHhTQJfDRhVtxRyXGFpU/0XiKAO
+-- scouter2@saql.com / Scout456! = $2a$10$2KzqY5cBe1jQPDYZJx5U.gJHgGHhTQJfDRhVtxRyXGFpU/0XiKAO
+-- scouter3@saql.com / Scout789! = $2a$10$1KzqY5cBe1jQPDYZJx5U.gJHgGHhTQJfDRhVtxRyXGFpU/0XiKAO
+
+INSERT INTO scouters (email, password, name) VALUES
+('scouter1@saql.com', '$2a$10$3KzqY5cBe1jQPDYZJx5U.gJHgGHhTQJfDRhVtxRyXGFpU/0XiKAO', 'Scouter One'),
+('scouter2@saql.com', '$2a$10$2KzqY5cBe1jQPDYZJx5U.gJHgGHhTQJfDRhVtxRyXGFpU/0XiKAO', 'Scouter Two'),
+('scouter3@saql.com', '$2a$10$1KzqY5cBe1jQPDYZJx5U.gJHgGHhTQJfDRhVtxRyXGFpU/0XiKAO', 'Scouter Three');

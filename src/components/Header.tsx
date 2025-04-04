@@ -10,6 +10,7 @@ export default function Header() {
   const { user, logout } = useAuth()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const isActive = (path: string) => pathname === path
 
@@ -51,14 +52,45 @@ export default function Header() {
     <header className="bg-[#FFFFFF] text-[#000000] border-b border-[#DDDDDD]">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          <Link href="/" className="flex items-center -ml-12">
+          <Link href="/" className="flex items-center">
             <img 
               src="/images/saql-transparent2.png" 
               alt="Saql Logo" 
-              className="h-24 w-auto"
+              className="h-16 sm:h-20 w-auto"
             />
           </Link>
 
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+            aria-label="Toggle menu"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              {isMobileMenuOpen ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              )}
+            </svg>
+          </button>
+
+          {/* Desktop Navigation */}
           <nav className="absolute left-1/2 transform -translate-x-1/2 hidden md:flex items-center space-x-12">
             <Link
               href="/"
@@ -86,7 +118,8 @@ export default function Header() {
             </Link>
           </nav>
 
-          <div className="flex items-center space-x-4">
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -96,7 +129,7 @@ export default function Header() {
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                  <span className="hidden md:inline">{user.name}</span>
+                  <span>{user.name}</span>
                   <svg
                     className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
                     fill="none"
@@ -143,6 +176,82 @@ export default function Header() {
             )}
           </div>
         </div>
+
+        {/* Mobile Navigation */}
+        {isMobileMenuOpen && (
+          <nav className="md:hidden py-4 border-t border-[#DDDDDD]">
+            <div className="flex flex-col space-y-4">
+              <Link
+                href="/"
+                className={`text-[#000000] hover:text-[#14D922] transition-colors text-lg font-medium ${
+                  isActive('/') ? 'text-[#14D922]' : ''
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link
+                href="/team"
+                className={`text-[#000000] hover:text-[#14D922] transition-colors text-lg font-medium ${
+                  isActive('/team') ? 'text-[#14D922]' : ''
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Team
+              </Link>
+              <Link
+                href="/contact"
+                className={`text-[#000000] hover:text-[#14D922] transition-colors text-lg font-medium ${
+                  isActive('/contact') ? 'text-[#14D922]' : ''
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              
+              {/* Mobile Auth Buttons */}
+              <div className="pt-4 border-t border-[#DDDDDD]">
+                {user ? (
+                  <>
+                    <Link
+                      href={getDashboardPath()}
+                      className="block w-full text-center py-2 text-[#000000] hover:text-[#14D922] transition-colors text-lg font-medium"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout()
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className="w-full text-center py-2 text-[#000000] hover:text-[#14D922] transition-colors text-lg font-medium"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      className="block w-full text-center py-2 text-[#000000] hover:text-[#14D922] transition-colors text-lg font-medium"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/signup"
+                      className="block w-full text-center py-2 bg-[#14D922] text-white rounded-lg font-semibold hover:bg-[#10B61E] transition-colors text-lg font-medium mt-2"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Sign Up
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </nav>
+        )}
       </div>
     </header>
   )

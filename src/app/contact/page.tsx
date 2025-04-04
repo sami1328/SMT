@@ -62,11 +62,11 @@ export default function Contact() {
   return (
     <main className="min-h-screen bg-white flex flex-col justify-center">
       {/* Hero Section */}
-      <section className="py-8 bg-white">
-        <div className="container mx-auto px-8">
+      <section className="py-6 sm:py-8 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-black">Contact Us</h1>
-            <p className="text-lg text-[#555555] max-w-2xl mx-auto mb-8">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-black">Contact Us</h1>
+            <p className="text-base sm:text-lg text-[#555555] max-w-2xl mx-auto mb-6 sm:mb-8 px-4">
               Get in touch with our team for any questions or inquiries
             </p>
           </div>
@@ -74,109 +74,75 @@ export default function Contact() {
       </section>
 
       {/* Contact Form Section */}
-      <section className="py-4 bg-white">
-        <div className="container mx-auto px-8">
+      <section className="py-4 sm:py-6 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-xl mx-auto">
             {error && (
-              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm sm:text-base">
                 {error}
               </div>
             )}
             {success && (
-              <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+              <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg text-sm sm:text-base">
                 {success}
               </div>
             )}
             
             {/* Contact Form */}
-            <div className="bg-white p-6 rounded-xl border border-[#DDDDDD] shadow-lg">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-base font-medium text-black mb-1"
-                  >
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-[#DDDDDD] rounded-lg focus:ring-2 focus:ring-[#14D922] focus:border-[#14D922] text-black"
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-base font-medium text-black mb-1"
-                  >
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-[#DDDDDD] rounded-lg focus:ring-2 focus:ring-[#14D922] focus:border-[#14D922] text-black"
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="subject"
-                    className="block text-base font-medium text-black mb-1"
-                  >
-                    Subject
-                  </label>
-                  <select
-                    id="subject"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-[#DDDDDD] rounded-lg focus:ring-2 focus:ring-[#14D922] focus:border-[#14D922] bg-white text-black [&>option]:bg-white [&>option]:text-black [&>option]:py-1 [&>option:hover]:bg-[#14D922] [&>option:hover]:text-white"
-                    required
-                    disabled={loading}
-                  >
-                    <option value="">Select a subject</option>
-                    <option value="general">General Inquiry</option>
-                    <option value="support">Technical Support</option>
-                    <option value="partnership">Partnership</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label
-                    htmlFor="message"
-                    className="block text-base font-medium text-black mb-1"
-                  >
-                    Message
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-[#DDDDDD] rounded-lg focus:ring-2 focus:ring-[#14D922] focus:border-[#14D922] text-black"
-                    required
-                    disabled={loading}
-                  ></textarea>
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-[#14D922] text-white py-2 px-4 rounded-lg text-base font-semibold hover:bg-[#11B91D] transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-                >
-                  {loading ? 'Sending...' : 'Send Message'}
-                </button>
-              </form>
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+              <div>
+                <label htmlFor="name" className="block text-sm sm:text-base font-medium text-gray-700 mb-1">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#14D922] focus:border-transparent text-sm sm:text-base"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm sm:text-base font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#14D922] focus:border-transparent text-sm sm:text-base"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="message" className="block text-sm sm:text-base font-medium text-gray-700 mb-1">
+                  Message
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows={4}
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#14D922] focus:border-transparent text-sm sm:text-base"
+                  required
+                ></textarea>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#14D922] text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-[#10B61E] transition-colors duration-200 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Sending...' : 'Send Message'}
+              </button>
+            </form>
           </div>
         </div>
       </section>

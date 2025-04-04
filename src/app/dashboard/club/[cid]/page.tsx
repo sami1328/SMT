@@ -96,6 +96,8 @@ export default function ClubDashboard({ params }: { params: { cid: string } }) {
   const [feedback, setFeedback] = useState('')
   const supabase = createClientComponentClient()
   const router = useRouter()
+  const [selectedApplication, setSelectedApplication] = useState<string | null>(null)
+  const [confirmAction, setConfirmAction] = useState<'accept' | 'reject' | null>(null)
 
   useEffect(() => {
     fetchTraineesData()
@@ -334,15 +336,44 @@ export default function ClubDashboard({ params }: { params: { cid: string } }) {
   const handleApplicationStatus = async (applicationId: string, status: 'Accepted' | 'Rejected') => {
     try {
       setError(null)
-      const { error: updateError } = await supabase
-        .from('club_applications')
-        .update({
-          status,
-          feedback: feedback || (status === 'Accepted' ? 'Welcome to the team!' : 'Thank you for your interest.')
-        })
-        .eq('id', applicationId)
 
-      if (updateError) throw updateError
+      // Get the application data first to get the trainee_uid
+      const { data: applicationData, error: fetchError } = await supabase
+        .from('club_applications')
+        .select('trainee_uid')
+        .eq('id', applicationId)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      // Start a transaction by using Promise.all
+      const updatePromises = [
+        // Update application status
+        supabase
+          .from('club_applications')
+          .update({
+            status,
+            feedback: feedback || (status === 'Accepted' ? 'Welcome to the team!' : 'Thank you for your interest.')
+          })
+          .eq('id', applicationId)
+      ]
+
+      // If accepting, update the trainee's final_club_id
+      if (status === 'Accepted') {
+        updatePromises.push(
+          supabase
+            .from('trainees')
+            .update({ final_club_id: params.cid })
+            .eq('tid', applicationData.trainee_uid)
+        )
+      }
+
+      const results = await Promise.all(updatePromises)
+      const errors = results.map(result => result.error).filter(Boolean)
+      
+      if (errors.length > 0) {
+        throw errors[0]
+      }
 
       // Refresh applications and team members
       await Promise.all([fetchApplications(), fetchTeamMembers()])
@@ -387,6 +418,17 @@ export default function ClubDashboard({ params }: { params: { cid: string } }) {
     }
   };
 
+  const handleConfirmAction = async () => {
+    if (selectedApplication && confirmAction) {
+      await handleApplicationStatus(
+        selectedApplication, 
+        confirmAction === 'accept' ? 'Accepted' : 'Rejected'
+      )
+      setSelectedApplication(null)
+      setConfirmAction(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white text-[#000000] p-8">
@@ -407,21 +449,21 @@ export default function ClubDashboard({ params }: { params: { cid: string } }) {
   const stats = getApplicationStats()
 
   return (
-    <div className="min-h-screen bg-white text-[#000000] p-8">
+    <div className="min-h-screen bg-white text-[#000000] p-4 sm:p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Club Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-8">Club Dashboard</h1>
 
         {/* Club Info */}
-        <div className="bg-white rounded-lg border border-[#E6E6E6] p-6 mb-8">
-          <div className="flex items-center space-x-4">
+        <div className="bg-white rounded-lg border border-[#E6E6E6] p-4 sm:p-6 mb-4 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             {club?.logo_url && (
               <img
                 src={club.logo_url}
                 alt={`${club.name} logo`}
-                className="w-16 h-16 object-contain"
+                className="w-16 h-16 object-contain mx-auto sm:mx-0"
               />
             )}
-            <div>
+            <div className="text-center sm:text-left">
               <h2 className="text-xl font-semibold">{club?.name}</h2>
               <p className="text-[#555555]">{club?.location}</p>
               <p className="text-[#555555] mt-2">{club?.description}</p>
@@ -430,44 +472,44 @@ export default function ClubDashboard({ params }: { params: { cid: string } }) {
         </div>
 
         {/* Application Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg border border-[#E6E6E6] p-6">
-            <h3 className="text-[#555555] mb-2">Total Applications</h3>
-            <p className="text-2xl font-bold">{stats.total}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-8">
+          <div className="bg-white rounded-lg border border-[#E6E6E6] p-3 sm:p-6">
+            <h3 className="text-[#555555] text-sm sm:text-base mb-1 sm:mb-2">Total Applications</h3>
+            <p className="text-xl sm:text-2xl font-bold">{stats.total}</p>
           </div>
-          <div className="bg-white rounded-lg border border-[#E6E6E6] p-6">
-            <h3 className="text-[#555555] mb-2">Pending</h3>
-            <p className="text-2xl font-bold text-[#FFC107]">{stats.pending}</p>
+          <div className="bg-white rounded-lg border border-[#E6E6E6] p-3 sm:p-6">
+            <h3 className="text-[#555555] text-sm sm:text-base mb-1 sm:mb-2">Pending</h3>
+            <p className="text-xl sm:text-2xl font-bold text-[#FFC107]">{stats.pending}</p>
           </div>
-          <div className="bg-white rounded-lg border border-[#E6E6E6] p-6">
-            <h3 className="text-[#555555] mb-2">Accepted</h3>
-            <p className="text-2xl font-bold text-[#14D922]">{stats.accepted}</p>
+          <div className="bg-white rounded-lg border border-[#E6E6E6] p-3 sm:p-6">
+            <h3 className="text-[#555555] text-sm sm:text-base mb-1 sm:mb-2">Accepted</h3>
+            <p className="text-xl sm:text-2xl font-bold text-[#14D922]">{stats.accepted}</p>
           </div>
-          <div className="bg-white rounded-lg border border-[#E6E6E6] p-6">
-            <h3 className="text-[#555555] mb-2">Rejected</h3>
-            <p className="text-2xl font-bold text-[#F44336]">{stats.rejected}</p>
+          <div className="bg-white rounded-lg border border-[#E6E6E6] p-3 sm:p-6">
+            <h3 className="text-[#555555] text-sm sm:text-base mb-1 sm:mb-2">Rejected</h3>
+            <p className="text-xl sm:text-2xl font-bold text-[#F44336]">{stats.rejected}</p>
           </div>
         </div>
 
         {/* Recent Applications */}
-        <div className="bg-white rounded-lg border border-[#E6E6E6] p-6">
-          <h2 className="text-xl font-semibold mb-4">Recent Applications</h2>
+        <div className="bg-white rounded-lg border border-[#E6E6E6] p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold mb-4">Recent Applications</h2>
           {applications.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {applications.slice(0, 5).map((application) => (
-                <div key={application.id} className="bg-white rounded-lg border border-[#E6E6E6] p-4">
-                  <div className="flex justify-between items-start">
+                <div key={application.id} className="bg-white rounded-lg border border-[#E6E6E6] p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-0">
                     <div>
-                      <h3 className="font-semibold">{application.trainee.name}</h3>
-                      <p className="text-[#555555] text-sm">
+                      <h3 className="font-semibold text-center sm:text-left">{application.trainee.name}</h3>
+                      <p className="text-[#555555] text-sm text-center sm:text-left">
                         Position: {application.trainee.preferred_position} | 
                         Age: {new Date().getFullYear() - new Date(application.trainee.birth_date).getFullYear()}
                       </p>
-                      <p className="text-xs text-[#555555] mt-1">
+                      <p className="text-xs text-[#555555] mt-1 text-center sm:text-left">
                         Applied on {new Date(application.submitted_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-sm ${
+                    <span className={`px-3 py-1 rounded-full text-sm self-center sm:self-start ${
                       application.status === 'Accepted' ? 'bg-[#14D922]/20 text-[#14D922]' :
                       application.status === 'Rejected' ? 'bg-[#F44336]/20 text-[#F44336]' :
                       'bg-[#FFC107]/20 text-[#FFC107]'
@@ -475,24 +517,30 @@ export default function ClubDashboard({ params }: { params: { cid: string } }) {
                       {application.status}
                     </span>
                   </div>
-                  <div className="mt-4 flex justify-end space-x-4">
+                  <div className="mt-4 flex flex-wrap justify-center sm:justify-end gap-2">
                     <button
                       onClick={() => router.push(`/dashboard/club/${params.cid}/trainee/${application.trainee_uid}`)}
-                      className="px-4 py-2 bg-[#14D922] text-white rounded-lg hover:bg-[#10B31A] transition-colors"
+                      className="px-3 py-1.5 bg-[#14D922] text-white rounded-lg hover:bg-[#10B31A] transition-colors text-sm"
                     >
                       View Profile
                     </button>
                     {application.status === 'Pending' && (
                       <>
                         <button
-                          onClick={() => handleApplicationStatus(application.id, 'Rejected')}
-                          className="px-4 py-2 bg-[#F44336] text-white rounded-lg hover:bg-[#D33A2C] transition-colors"
+                          onClick={() => {
+                            setSelectedApplication(application.id)
+                            setConfirmAction('reject')
+                          }}
+                          className="px-3 py-1.5 bg-[#F44336] text-white rounded-lg hover:bg-[#D33A2C] transition-colors text-sm"
                         >
                           Reject
                         </button>
                         <button
-                          onClick={() => handleApplicationStatus(application.id, 'Accepted')}
-                          className="px-4 py-2 bg-[#14D922] text-white rounded-lg hover:bg-[#10B31A] transition-colors"
+                          onClick={() => {
+                            setSelectedApplication(application.id)
+                            setConfirmAction('accept')
+                          }}
+                          className="px-3 py-1.5 bg-[#14D922] text-white rounded-lg hover:bg-[#10B31A] transition-colors text-sm"
                         >
                           Accept
                         </button>
@@ -509,264 +557,65 @@ export default function ClubDashboard({ params }: { params: { cid: string } }) {
               ))}
             </div>
           ) : (
-            <p className="text-[#555555]">No applications yet.</p>
+            <p className="text-[#555555] text-center sm:text-left">No applications yet.</p>
           )}
         </div>
 
-        {/* Trainee Profile Modal */}
-        {selectedTrainee && (
+        {/* Confirmation Modal */}
+        {selectedApplication && confirmAction && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg p-6 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-              {/* Header */}
-              <div className="flex justify-between items-center mb-6 pb-4 border-b border-[#E6E6E6]">
-                <h3 className="text-2xl font-bold">Trainee Profile</h3>
+            <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+              <h3 className="text-lg font-semibold mb-4">
+                {confirmAction === 'accept' ? 'Accept Application' : 'Reject Application'}
+              </h3>
+              <p className="text-[#555555] mb-4">
+                {confirmAction === 'accept' 
+                  ? 'Are you sure you want to accept this application?' 
+                  : 'Are you sure you want to reject this application?'}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                 <button
-                  onClick={() => setSelectedTrainee(null)}
-                  className="text-[#555555] hover:text-black transition-colors"
+                  onClick={() => {
+                    setSelectedApplication(null)
+                    setConfirmAction(null)
+                  }}
+                  className="w-full sm:w-auto px-4 py-2 bg-[#E6E6E6] text-[#000000] rounded-lg hover:bg-[#D6D6D6] transition-colors text-sm"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  Cancel
                 </button>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Left Column - Info and Stats */}
-                <div className="space-y-6">
-                  {/* Basic Info */}
-                  <div className="bg-[#F5F5F5] rounded-lg p-4">
-                    <h4 className="text-lg font-semibold mb-4">Personal Information</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-[#555555] text-sm">Name</p>
-                        <p className="font-medium">{selectedTrainee.trainee.name}</p>
-                      </div>
-                      <div>
-                        <p className="text-[#555555] text-sm">Position</p>
-                        <p className="font-medium">{selectedTrainee.trainee.preferred_position}</p>
-                      </div>
-                      <div>
-                        <p className="text-[#555555] text-sm">Age</p>
-                        <p className="font-medium">
-                          {new Date().getFullYear() - new Date(selectedTrainee.trainee.birth_date).getFullYear()}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[#555555] text-sm">Application Date</p>
-                        <p className="font-medium">
-                          {new Date(selectedTrainee.submitted_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Performance Overview */}
-                  <div className="bg-[#F5F5F5] rounded-lg p-4">
-                    <h4 className="text-lg font-semibold mb-4">Performance Overview</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      {['Physical', 'Mental', 'Technical', 'Goalkeeper'].map((category) => (
-                        <div key={category} className="bg-[#E6E6E6] rounded-lg p-3">
-                          <h5 className="text-sm text-[#555555] mb-2">{category}</h5>
-                          <div className="text-2xl font-bold text-[#14D922]">
-                            {calculateCategoryAverage(selectedTrainee.trainee.test_result, category)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Detailed Attributes */}
-                  <div className="bg-[#F5F5F5] rounded-lg p-4">
-                    <h4 className="text-lg font-semibold mb-4">Detailed Attributes</h4>
-                    
-                    {/* Physical Attributes */}
-                    <div className="mb-6">
-                      <h5 className="text-md font-medium text-[#555555] mb-3">Physical</h5>
-                      <div className="space-y-3">
-                        {[
-                          'acceleration',
-                          'agility',
-                          'balance',
-                          'jumping',
-                          'reactions',
-                          'sprint_speed',
-                          'stamina',
-                          'strength'
-                        ].map((key) => {
-                          const value = selectedTrainee.trainee.test_result?.[key as keyof TestResult] ?? 0;
-                          return (
-                            <div key={key} className="flex items-center justify-between">
-                              <span className="text-sm text-[#555555] capitalize">{key.replace(/_/g, ' ')}</span>
-                              <div className="flex items-center gap-2">
-                                <div className="w-32 bg-[#E6E6E6] rounded-full h-2">
-                                  <div 
-                                    className="bg-[#14D922] h-2 rounded-full transition-all duration-300" 
-                                    style={{ width: `${value}%` }}
-                                  ></div>
-                                </div>
-                                <span className="text-sm font-medium w-8 text-right">{value}</span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Mental Attributes */}
-                    <div className="mb-6">
-                      <h5 className="text-md font-medium text-[#555555] mb-3">Mental</h5>
-                      <div className="space-y-3">
-                        {[
-                          'aggression',
-                          'att_position',
-                          'composure',
-                          'interceptions',
-                          'vision'
-                        ].map((key) => {
-                          const value = selectedTrainee.trainee.test_result?.[key as keyof TestResult] ?? 0;
-                          return (
-                            <div key={key} className="flex items-center justify-between">
-                              <span className="text-sm text-[#555555] capitalize">{key.replace(/_/g, ' ')}</span>
-                              <div className="flex items-center gap-2">
-                                <div className="w-32 bg-[#E6E6E6] rounded-full h-2">
-                                  <div 
-                                    className="bg-[#14D922] h-2 rounded-full transition-all duration-300" 
-                                    style={{ width: `${value}%` }}
-                                  ></div>
-                                </div>
-                                <span className="text-sm font-medium w-8 text-right">{value}</span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Technical Attributes */}
-                    <div className="mb-6">
-                      <h5 className="text-md font-medium text-[#555555] mb-3">Technical</h5>
-                      <div className="space-y-3">
-                        {[
-                          'ball_control',
-                          'crossing',
-                          'curve',
-                          'defensive_awareness',
-                          'dribbling',
-                          'fk_accuracy',
-                          'finishing',
-                          'heading_accuracy',
-                          'long_passing',
-                          'long_shots',
-                          'penalties',
-                          'short_passing',
-                          'shot_power',
-                          'sliding_tackle',
-                          'standing_tackle',
-                          'volleys'
-                        ].map((key) => {
-                          const value = selectedTrainee.trainee.test_result?.[key as keyof TestResult] ?? 0;
-                          return (
-                            <div key={key} className="flex items-center justify-between">
-                              <span className="text-sm text-[#555555] capitalize">{key.replace(/_/g, ' ')}</span>
-                              <div className="flex items-center gap-2">
-                                <div className="w-32 bg-[#E6E6E6] rounded-full h-2">
-                                  <div 
-                                    className="bg-[#14D922] h-2 rounded-full transition-all duration-300" 
-                                    style={{ width: `${value}%` }}
-                                  ></div>
-                                </div>
-                                <span className="text-sm font-medium w-8 text-right">{value}</span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Goalkeeper Attributes */}
-                    <div>
-                      <h5 className="text-md font-medium text-[#555555] mb-3">Goalkeeper</h5>
-                      <div className="space-y-3">
-                        {[
-                          'gk_diving',
-                          'gk_handling',
-                          'gk_kicking',
-                          'gk_positioning',
-                          'gk_reflexes'
-                        ].map((key) => {
-                          const value = selectedTrainee.trainee.test_result?.[key as keyof TestResult] ?? 0;
-                          return (
-                            <div key={key} className="flex items-center justify-between">
-                              <span className="text-sm text-[#555555] capitalize">{key.replace(/_/g, ' ')}</span>
-                              <div className="flex items-center gap-2">
-                                <div className="w-32 bg-[#E6E6E6] rounded-full h-2">
-                                  <div 
-                                    className="bg-[#14D922] h-2 rounded-full transition-all duration-300" 
-                                    style={{ width: `${value}%` }}
-                                  ></div>
-                                </div>
-                                <span className="text-sm font-medium w-8 text-right">{value}</span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column - Football Field */}
-                <div className="bg-[#F5F5F5] rounded-lg p-4">
-                  <h4 className="text-lg font-semibold mb-4">Position Visualization</h4>
-                  <div className="relative w-full" style={{ paddingBottom: '150%' }}>
-                    <div className="absolute inset-0 bg-[#2D5A27] rounded-lg overflow-hidden">
-                      {/* Field Lines */}
-                      <div className="absolute inset-0 border-2 border-white/30 rounded-lg" />
-                      {/* Center Circle */}
-                      <div className="absolute top-1/2 left-1/2 w-24 h-24 border-2 border-white/30 rounded-full -translate-x-1/2 -translate-y-1/2" />
-                      {/* Center Line */}
-                      <div className="absolute top-0 left-1/2 w-0.5 h-full bg-white/30 -translate-x-1/2" />
-                      {/* Penalty Areas */}
-                      <div className="absolute top-0 left-1/2 w-48 h-36 border-2 border-white/30 -translate-x-1/2" />
-                      <div className="absolute bottom-0 left-1/2 w-48 h-36 border-2 border-white/30 -translate-x-1/2" />
-                      {/* Goal Areas */}
-                      <div className="absolute top-0 left-1/2 w-24 h-12 border-2 border-white/30 -translate-x-1/2" />
-                      <div className="absolute bottom-0 left-1/2 w-24 h-12 border-2 border-white/30 -translate-x-1/2" />
-                      
-                      {/* Position Marker */}
-                      <div className={`absolute w-6 h-6 bg-[#14D922] rounded-full shadow-lg transform -translate-x-1/2 -translate-y-1/2 ${
-                        selectedTrainee.trainee.preferred_position.toLowerCase().includes('forward') ? 'top-[25%] left-1/2' :
-                        selectedTrainee.trainee.preferred_position.toLowerCase().includes('midfielder') ? 'top-1/2 left-1/2' :
-                        selectedTrainee.trainee.preferred_position.toLowerCase().includes('defender') ? 'top-[75%] left-1/2' :
-                        selectedTrainee.trainee.preferred_position.toLowerCase().includes('goalkeeper') ? 'top-[90%] left-1/2' :
-                        'top-1/2 left-1/2'
-                      }`} />
-                    </div>
-                  </div>
-                </div>
+                <button
+                  onClick={handleConfirmAction}
+                  className={`w-full sm:w-auto px-4 py-2 text-white rounded-lg transition-colors text-sm ${
+                    confirmAction === 'accept'
+                      ? 'bg-[#14D922] hover:bg-[#10B31A]'
+                      : 'bg-[#F44336] hover:bg-[#D33A2C]'
+                  }`}
+                >
+                  {confirmAction === 'accept' ? 'Accept' : 'Reject'}
+                </button>
               </div>
             </div>
           </div>
         )}
 
         {/* Team Section */}
-        <div className="bg-white rounded-lg border border-[#E6E6E6] p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Team Members</h2>
+        <div className="bg-white rounded-lg border border-[#E6E6E6] p-4 sm:p-6 mt-4 sm:mt-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2 sm:gap-0">
+            <h2 className="text-lg sm:text-xl font-semibold">Team Members</h2>
             <span className="text-sm text-[#555555]">
               {teamMembers.length} {teamMembers.length === 1 ? 'Member' : 'Members'}
             </span>
           </div>
 
           {teamMembers.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {teamMembers.map((member) => (
                 <div key={member.tid} className="bg-[#F5F5F5] rounded-lg p-4">
-                  <h3 className="font-semibold">{member.name}</h3>
-                  <p className="text-[#555555]">Position: {member.preferred_position}</p>
+                  <h3 className="font-semibold text-center sm:text-left">{member.name}</h3>
+                  <p className="text-[#555555] text-center sm:text-left">Position: {member.preferred_position}</p>
                   {member.test_results && member.test_results.length > 0 && (
                     <div className="mt-3 space-y-2">
-                      <p className="text-sm text-[#555555]">
+                      <p className="text-sm text-[#555555] text-center sm:text-left">
                         Latest Test Score: {Math.round(
                           (member.test_results[0].acceleration + member.test_results[0].agility + 
                            member.test_results[0].balance + member.test_results[0].jumping + 
@@ -776,7 +625,7 @@ export default function ClubDashboard({ params }: { params: { cid: string } }) {
                       </p>
                       <button
                         onClick={() => router.push(`/dashboard/club/${params.cid}/applications/${member.tid}`)}
-                        className="text-sm text-[#14D922] hover:text-[#10B31A]"
+                        className="w-full sm:w-auto text-sm text-[#14D922] hover:text-[#10B31A] text-center sm:text-left"
                       >
                         View Details
                       </button>
@@ -786,12 +635,12 @@ export default function ClubDashboard({ params }: { params: { cid: string } }) {
               ))}
             </div>
           ) : (
-            <p className="text-[#555555]">No team members yet.</p>
+            <p className="text-[#555555] text-center sm:text-left">No team members yet.</p>
           )}
         </div>
 
         {error && (
-          <div className="mt-4 p-4 bg-[#F44336]/20 text-[#F44336] rounded-lg">
+          <div className="mt-4 p-4 bg-[#F44336]/20 text-[#F44336] rounded-lg text-center sm:text-left">
             {error}
           </div>
         )}

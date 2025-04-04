@@ -369,72 +369,74 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
         </div>
 
         {/* Trainees Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden border border-[#E6E6E6]">
-          <table className="min-w-full divide-y divide-[#E6E6E6]">
-            <thead className="bg-white">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#555555] uppercase tracking-wider">
-                  Trainee ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#555555] uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#555555] uppercase tracking-wider">
-                  Age
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#555555] uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[#555555] uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-[#E6E6E6]">
-              {currentTrainees.map((trainee) => (
-                <tr key={trainee.tid} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[#555555]">
-                    {trainee.tid}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-black">
-                    {trainee.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[#555555]">
-                    {new Date(trainee.birth_date).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`px-3 py-1 rounded-full text-sm ${
-                      trainee.status === 'Test Completed' ? 'bg-[#14D922]/20 text-[#14D922]' :
-                      trainee.status === 'Test Failed' ? 'bg-red-500/20 text-red-600' :
-                      'bg-yellow-500/20 text-yellow-600'
-                    }`}>
-                      {trainee.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {trainee.status === 'Pending Test' ? (
-                      <button
-                        onClick={() => {
-                          setSelectedTrainee(trainee);
-                          setShowTestForm(true);
-                        }}
-                        className="text-[#14D922] hover:text-[#10B61E] transition-colors"
-                      >
-                        Take Test
-                      </button>
-                    ) : trainee.status === 'Test Completed' ? (
-                      <button
-                        onClick={() => router.push(`/dashboard/scouter/${params.sid}/trainee/${trainee.tid}/results`)}
-                        className="text-blue-600 hover:text-blue-800 transition-colors"
-                      >
-                        View Results
-                      </button>
-                    ) : null}
-                  </td>
+        <div className="bg-white rounded-lg shadow border border-[#E6E6E6] overflow-hidden">
+          <div className="w-full overflow-x-auto">
+            <table className="min-w-full divide-y divide-[#E6E6E6]">
+              <thead className="bg-white">
+                <tr>
+                  <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-[#555555] uppercase tracking-wider bg-white">
+                    ID
+                  </th>
+                  <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-[#555555] uppercase tracking-wider bg-white">
+                    Name
+                  </th>
+                  <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-[#555555] uppercase tracking-wider bg-white">
+                    Age
+                  </th>
+                  <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-[#555555] uppercase tracking-wider bg-white">
+                    Status
+                  </th>
+                  <th scope="col" className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-[#555555] uppercase tracking-wider bg-white">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-[#E6E6E6]">
+                {currentTrainees.map((trainee) => (
+                  <tr key={trainee.tid} className="hover:bg-gray-50">
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-[#555555]">
+                      {trainee.tid}
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-black">
+                      {trainee.name}
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-[#555555]">
+                      {new Date(trainee.birth_date).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm">
+                      <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${
+                        trainee.status === 'Test Completed' ? 'bg-[#14D922]/20 text-[#14D922]' :
+                        trainee.status === 'Test Failed' ? 'bg-red-500/20 text-red-600' :
+                        'bg-yellow-500/20 text-yellow-600'
+                      }`}>
+                        {trainee.status}
+                      </span>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm">
+                      {trainee.status === 'Pending Test' ? (
+                        <button
+                          onClick={() => {
+                            setSelectedTrainee(trainee);
+                            setShowTestForm(true);
+                          }}
+                          className="text-[#14D922] hover:text-[#10B61E] transition-colors"
+                        >
+                          Take Test
+                        </button>
+                      ) : trainee.status === 'Test Completed' ? (
+                        <button
+                          onClick={() => router.push(`/dashboard/scouter/${params.sid}/trainee/${trainee.tid}/results`)}
+                          className="text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                          View Results
+                        </button>
+                      ) : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Pagination */}
@@ -474,11 +476,11 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
 
         {/* Test Form Modal */}
         {showTestForm && selectedTrainee && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-              <div className="p-6 border-b border-[#E6E6E6]">
+          <div className="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center p-0 sm:p-4 z-50 overflow-y-auto">
+            <div className="bg-white w-full sm:rounded-lg shadow-xl sm:max-w-6xl h-full sm:h-auto sm:max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 z-10 bg-white p-4 sm:p-6 border-b border-[#E6E6E6]">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-semibold text-black">
+                  <h2 className="text-lg sm:text-xl font-semibold text-black">
                     Test Form - {selectedTrainee.name}
                   </h2>
                   <button
@@ -486,17 +488,17 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                       setShowTestForm(false);
                       setSelectedTrainee(null);
                     }}
-                    className="text-[#555555] hover:text-black transition-colors"
+                    className="p-2 -mr-2 text-[#555555] hover:text-black transition-colors"
                   >
                     ✕
                   </button>
                 </div>
               </div>
-              <form onSubmit={handleSubmitTest} className="p-6">
+              <form onSubmit={handleSubmitTest} className="p-4 sm:p-6">
                 {/* Physical Attributes */}
-                <div className="mb-8">
-                  <h3 className="text-lg font-medium text-black mb-4">Physical Attributes</h3>
-                  <div className="grid grid-cols-2 gap-6">
+                <div className="mb-6 sm:mb-8">
+                  <h3 className="text-base sm:text-lg font-medium text-black mb-4">Physical Attributes</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     {[
                       { key: 'acceleration', label: 'Acceleration' },
                       { key: 'agility', label: 'Agility' },
@@ -507,17 +509,17 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                       { key: 'stamina', label: 'Stamina' },
                       { key: 'strength', label: 'Strength' }
                     ].map(({ key, label }) => (
-                      <div key={key} className="space-y-2">
+                      <div key={key} className="space-y-2 bg-gray-50 p-3 rounded-lg">
                         <div className="flex justify-between items-center">
                           <label className="block text-sm font-medium text-[#555555]">
                             {label}
                           </label>
-                          <span className="text-sm text-black font-medium">
+                          <span className="text-sm text-black font-medium bg-white px-2 py-1 rounded">
                             {testForm[key as keyof TestResult]}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className="text-xs text-[#555555]">1</span>
+                          <span className="text-xs text-[#555555] min-w-[16px]">1</span>
                           <input
                             type="range"
                             min="1"
@@ -530,9 +532,9 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                                 [key]: parseInt(e.target.value),
                               })
                             }
-                            className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-[#14D922]"
+                            className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#14D922]"
                           />
-                          <span className="text-xs text-[#555555]">99</span>
+                          <span className="text-xs text-[#555555] min-w-[16px]">99</span>
                         </div>
                       </div>
                     ))}
@@ -540,9 +542,9 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                 </div>
 
                 {/* Mental Attributes */}
-                <div className="mb-8">
-                  <h3 className="text-lg font-medium text-black mb-4">Mental Attributes</h3>
-                  <div className="grid grid-cols-2 gap-6">
+                <div className="mb-6 sm:mb-8">
+                  <h3 className="text-base sm:text-lg font-medium text-black mb-4">Mental Attributes</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     {[
                       { key: 'aggression', label: 'Aggression' },
                       { key: 'att_position', label: 'Attacking Position' },
@@ -550,17 +552,17 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                       { key: 'interceptions', label: 'Interceptions' },
                       { key: 'vision', label: 'Vision' }
                     ].map(({ key, label }) => (
-                      <div key={key} className="space-y-2">
+                      <div key={key} className="space-y-2 bg-gray-50 p-3 rounded-lg">
                         <div className="flex justify-between items-center">
                           <label className="block text-sm font-medium text-[#555555]">
                             {label}
                           </label>
-                          <span className="text-sm text-black font-medium">
+                          <span className="text-sm text-black font-medium bg-white px-2 py-1 rounded">
                             {testForm[key as keyof TestResult]}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className="text-xs text-[#555555]">1</span>
+                          <span className="text-xs text-[#555555] min-w-[16px]">1</span>
                           <input
                             type="range"
                             min="1"
@@ -573,9 +575,9 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                                 [key]: parseInt(e.target.value),
                               })
                             }
-                            className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-[#14D922]"
+                            className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#14D922]"
                           />
-                          <span className="text-xs text-[#555555]">99</span>
+                          <span className="text-xs text-[#555555] min-w-[16px]">99</span>
                         </div>
                       </div>
                     ))}
@@ -583,9 +585,9 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                 </div>
 
                 {/* Technical Attributes */}
-                <div className="mb-8">
-                  <h3 className="text-lg font-medium text-black mb-4">Technical Attributes</h3>
-                  <div className="grid grid-cols-2 gap-6">
+                <div className="mb-6 sm:mb-8">
+                  <h3 className="text-base sm:text-lg font-medium text-black mb-4">Technical Attributes</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     {[
                       { key: 'ball_control', label: 'Ball Control' },
                       { key: 'crossing', label: 'Crossing' },
@@ -604,17 +606,17 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                       { key: 'standing_tackle', label: 'Standing Tackle' },
                       { key: 'volleys', label: 'Volleys' }
                     ].map(({ key, label }) => (
-                      <div key={key} className="space-y-2">
+                      <div key={key} className="space-y-2 bg-gray-50 p-3 rounded-lg">
                         <div className="flex justify-between items-center">
                           <label className="block text-sm font-medium text-[#555555]">
                             {label}
                           </label>
-                          <span className="text-sm text-black font-medium">
+                          <span className="text-sm text-black font-medium bg-white px-2 py-1 rounded">
                             {testForm[key as keyof TestResult]}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className="text-xs text-[#555555]">1</span>
+                          <span className="text-xs text-[#555555] min-w-[16px]">1</span>
                           <input
                             type="range"
                             min="1"
@@ -627,9 +629,9 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                                 [key]: parseInt(e.target.value),
                               })
                             }
-                            className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-[#14D922]"
+                            className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#14D922]"
                           />
-                          <span className="text-xs text-[#555555]">99</span>
+                          <span className="text-xs text-[#555555] min-w-[16px]">99</span>
                         </div>
                       </div>
                     ))}
@@ -637,9 +639,9 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                 </div>
 
                 {/* Goalkeeper Attributes */}
-                <div className="mb-8">
-                  <h3 className="text-lg font-medium text-black mb-4">Goalkeeper Attributes</h3>
-                  <div className="grid grid-cols-2 gap-6">
+                <div className="mb-6 sm:mb-8">
+                  <h3 className="text-base sm:text-lg font-medium text-black mb-4">Goalkeeper Attributes</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     {[
                       { key: 'gk_diving', label: 'Diving' },
                       { key: 'gk_handling', label: 'Handling' },
@@ -647,17 +649,17 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                       { key: 'gk_positioning', label: 'Positioning' },
                       { key: 'gk_reflexes', label: 'Reflexes' }
                     ].map(({ key, label }) => (
-                      <div key={key} className="space-y-2">
+                      <div key={key} className="space-y-2 bg-gray-50 p-3 rounded-lg">
                         <div className="flex justify-between items-center">
                           <label className="block text-sm font-medium text-[#555555]">
                             {label}
                           </label>
-                          <span className="text-sm text-black font-medium">
+                          <span className="text-sm text-black font-medium bg-white px-2 py-1 rounded">
                             {testForm[key as keyof TestResult]}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className="text-xs text-[#555555]">1</span>
+                          <span className="text-xs text-[#555555] min-w-[16px]">1</span>
                           <input
                             type="range"
                             min="1"
@@ -670,29 +672,29 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                                 [key]: parseInt(e.target.value),
                               })
                             }
-                            className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-[#14D922]"
+                            className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#14D922]"
                           />
-                          <span className="text-xs text-[#555555]">99</span>
+                          <span className="text-xs text-[#555555] min-w-[16px]">99</span>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4 border-t border-[#E6E6E6]">
+                <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-[#E6E6E6] p-4 sm:p-6 flex flex-col sm:flex-row justify-end gap-3">
                   <button
                     type="button"
                     onClick={() => {
                       setShowTestForm(false);
                       setSelectedTrainee(null);
                     }}
-                    className="px-4 py-2 text-sm font-medium text-[#555555] bg-white border border-[#E6E6E6] rounded-md hover:bg-gray-50 transition-colors"
+                    className="w-full sm:w-auto px-4 py-3 sm:py-2 text-sm font-medium text-[#555555] bg-white border border-[#E6E6E6] rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-[#14D922] rounded-md hover:bg-[#10B61E] transition-colors"
+                    className="w-full sm:w-auto px-4 py-3 sm:py-2 text-sm font-medium text-white bg-[#14D922] rounded-lg hover:bg-[#10B61E] transition-colors"
                   >
                     Submit Test
                   </button>

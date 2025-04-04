@@ -14,7 +14,7 @@ interface TeamMember {
 const teamMembers: TeamMember[] = [
   {
     name: 'Sami Alharbi',
-    role: 'Software Engineer & Team Leader',
+    role: 'Software Engineer',
     image: '/team/sami.jpg',
     description: 'Leading the development team with expertise in software engineering and project management.',
     linkedin: 'https://www.linkedin.com/in/sami-alharbi-409a7b2aa/', // Add your LinkedIn URL here
@@ -25,12 +25,12 @@ const teamMembers: TeamMember[] = [
     role: 'Software Engineer',
     image: '/team/mohammed.jpg',
     description: 'Focused on building robust and scalable applications with modern technologies.',
-    linkedin: '', // Add your LinkedIn URL here
-    email: ' ' // Add your email here
+    linkedin: 'https://www.linkedin.com/in/mohammed-al-khashlan-568917235/', // Add your LinkedIn URL here
+    email: 'mohammednasser.-@hotmail.com' // Add your email here
   },
   {
     name: 'Talal Almutairi',
-    role: 'Software Engineer',
+    role: 'Software Developer',
     image: '/team/talal.jpg',
     description: 'Specializing in full-stack development and creating innovative solutions.',
     linkedin: 'https://www.linkedin.com/in/talal-almutairi-1794b92ba/', // Add your LinkedIn URL here
@@ -41,20 +41,20 @@ const teamMembers: TeamMember[] = [
 export default function TeamPage() {
   return (
     <main className="min-h-screen w-full bg-white">
-      <div className="max-w-[1400px] mx-auto px-8 py-24">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-24">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-24"
+          className="text-center mb-12 sm:mb-16 md:mb-24"
         >
-          <h1 className="text-5xl font-bold text-[#000000] mb-6">Our Team</h1>
-          <p className="text-xl text-[#555555] max-w-3xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#000000] mb-4 sm:mb-6">Our Team</h1>
+          <p className="text-lg sm:text-xl text-[#555555] max-w-3xl mx-auto px-4">
             Meet the talented individuals behind Saql who are dedicated to revolutionizing soccer talent scouting.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12">
           {teamMembers.map((member, index) => (
             <motion.div
               key={index}
@@ -62,17 +62,17 @@ export default function TeamPage() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
               viewport={{ once: true }}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.02 }}
               className="bg-white rounded-xl overflow-hidden border border-[#E6E6E6]"
             >
               <motion.div 
                 className="aspect-w-1 aspect-h-1"
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="w-full h-72 bg-white flex items-center justify-center">
+                <div className="w-full h-48 sm:h-56 md:h-72 bg-white flex items-center justify-center">
                   <motion.span 
-                    className="text-7xl text-[#14D922] font-bold"
+                    className="text-5xl sm:text-6xl md:text-7xl text-[#14D922] font-bold"
                     initial={{ scale: 0.8 }}
                     whileInView={{ scale: 1 }}
                     transition={{ duration: 0.5, delay: index * 0.2 + 0.2 }}
@@ -83,14 +83,14 @@ export default function TeamPage() {
                 </div>
               </motion.div>
               <motion.div 
-                className="p-8"
+                className="p-6 sm:p-8"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: index * 0.2 + 0.3 }}
                 viewport={{ once: true }}
               >
                 <motion.h3 
-                  className="text-2xl font-semibold text-[#000000] mb-3"
+                  className="text-xl sm:text-2xl font-semibold text-[#000000] mb-2 sm:mb-3"
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.2 + 0.4 }}
@@ -99,7 +99,7 @@ export default function TeamPage() {
                   {member.name}
                 </motion.h3>
                 <motion.p 
-                  className="text-[#14D922] font-medium mb-5"
+                  className="text-[#14D922] font-medium mb-4 sm:mb-5"
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.2 + 0.5 }}
@@ -108,7 +108,7 @@ export default function TeamPage() {
                   {member.role}
                 </motion.p>
                 <motion.p 
-                  className="text-[#555555] mb-8"
+                  className="text-sm sm:text-base text-[#555555] mb-6 sm:mb-8"
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.2 + 0.6 }}
@@ -119,7 +119,7 @@ export default function TeamPage() {
                 
                 {/* Contact Information */}
                 <motion.div 
-                  className="space-y-3"
+                  className="space-y-2 sm:space-y-3"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.2 + 0.7 }}
@@ -127,11 +127,11 @@ export default function TeamPage() {
                 >
                   {member.email && (
                     <motion.div 
-                      className="flex items-center space-x-2 text-[#555555]"
+                      className="flex items-center space-x-2 text-sm sm:text-base text-[#555555]"
                       whileHover={{ x: 5 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                       <span>{member.email}</span>

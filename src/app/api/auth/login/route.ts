@@ -163,6 +163,52 @@ export async function POST(request: Request) {
       console.error('Error during club check:', error)
     }
 
+    // Check trainees table using Supabase Auth
+    console.log('Checking trainee login...')
+    try {
+      // Use Supabase Auth for trainee login
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+
+      if (authError) {
+        console.log('Auth error:', authError)
+        return NextResponse.json(
+          { error: 'Invalid email or password' },
+          { status: 401 }
+        )
+      }
+
+      if (authData.user) {
+        // Get trainee details from trainees table using email
+        const { data: traineeData, error: traineeError } = await supabase
+          .from('trainees')
+          .select('tid, name')
+          .eq('email', email)
+          .single()
+
+        if (traineeError) {
+          console.error('Error fetching trainee data:', traineeError)
+          return NextResponse.json(
+            { error: 'Failed to fetch trainee data' },
+            { status: 500 }
+          )
+        }
+
+        if (traineeData) {
+          console.log('Trainee login successful')
+          return NextResponse.json({
+            role: 'trainee',
+            id: traineeData.tid,
+            name: traineeData.name
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error during trainee check:', error)
+    }
+
     // If we reach here, no valid user was found
     console.log('No valid user found, returning error')
     return NextResponse.json(
