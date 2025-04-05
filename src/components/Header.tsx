@@ -124,7 +124,7 @@ export default function Header() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center space-x-2 text-[#000000] hover:text-[#14D922] transition-colors"
+                  className="flex items-center space-x-2 text-[#000000] hover:text-[#14D922] transition-colors bg-white rounded-lg px-3 py-2 border border-gray-200"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -141,18 +141,34 @@ export default function Header() {
                 </button>
 
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-[#FFFFFF] rounded-lg shadow-lg py-2 z-50 border border-[#DDDDDD]">
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200">
                     <Link
-                      href={getDashboardPath()}
-                      className="block px-4 py-2 text-[#000000] hover:bg-[#F5F5F5] hover:text-[#14D922] transition-colors"
+                      href="/profile"
+                      className="flex items-center px-4 py-2 text-[#000000] hover:bg-gray-50 hover:text-[#14D922] transition-colors"
                       onClick={() => setIsDropdownOpen(false)}
                     >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      Profile
+                    </Link>
+                    <Link
+                      href={getDashboardPath()}
+                      className="flex items-center px-4 py-2 text-[#000000] hover:bg-gray-50 hover:text-[#14D922] transition-colors"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                      </svg>
                       Dashboard
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-[#000000] hover:bg-[#F5F5F5] hover:text-[#14D922] transition-colors"
+                      className="flex items-center w-full px-4 py-2 text-[#000000] hover:bg-gray-50 hover:text-[#14D922] transition-colors"
                     >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
                       Sign Out
                     </button>
                   </div>
@@ -179,7 +195,7 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-[#DDDDDD]">
+          <nav className="md:hidden py-4 border-t border-gray-200 bg-white">
             <div className="flex flex-col space-y-4">
               <Link
                 href="/"
@@ -210,14 +226,27 @@ export default function Header() {
               </Link>
               
               {/* Mobile Auth Buttons */}
-              <div className="pt-4 border-t border-[#DDDDDD]">
+              <div className="pt-4 border-t border-gray-200">
                 {user ? (
                   <>
                     <Link
-                      href={getDashboardPath()}
-                      className="block w-full text-center py-2 text-[#000000] hover:text-[#14D922] transition-colors text-lg font-medium"
+                      href="/profile"
+                      className="flex items-center w-full py-2 text-[#000000] hover:bg-gray-50 hover:text-[#14D922] transition-colors text-lg font-medium"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      Profile
+                    </Link>
+                    <Link
+                      href={getDashboardPath()}
+                      className="flex items-center w-full py-2 text-[#000000] hover:bg-gray-50 hover:text-[#14D922] transition-colors text-lg font-medium"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                      </svg>
                       Dashboard
                     </Link>
                     <button
@@ -225,8 +254,11 @@ export default function Header() {
                         handleLogout()
                         setIsMobileMenuOpen(false)
                       }}
-                      className="w-full text-center py-2 text-[#000000] hover:text-[#14D922] transition-colors text-lg font-medium"
+                      className="flex items-center w-full py-2 text-[#000000] hover:bg-gray-50 hover:text-[#14D922] transition-colors text-lg font-medium"
                     >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
                       Sign Out
                     </button>
                   </>
