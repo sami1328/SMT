@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
-import html2canvas from 'html2canvas'
 
 interface Trainee {
   name: string
@@ -119,55 +118,6 @@ export default function ApplicationDetails({ params }: { params: { cid: string; 
     }
   }
 
-  const handleDownloadReport = async () => {
-    try {
-      // Get the pitch visualization element
-      const pitchElement = document.getElementById('pitch-visualization')
-      if (!pitchElement) return
-
-      // Convert pitch visualization to base64
-      const canvas = await html2canvas(pitchElement)
-      const pitchImage = canvas.toDataURL('image/png')
-
-      // Prepare trainee data
-      const traineeData = {
-        name: application?.trainee.name,
-        preferred_position: application?.trainee.preferred_position,
-        test_result: application?.trainee.test_result
-      }
-
-      // Generate PDF report
-      const response = await fetch('/api/generate-report', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          traineeData,
-          pitchImage
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to generate report')
-      }
-
-      // Create blob from response and trigger download
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `trainee-report-${application?.trainee.name}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-    } catch (error) {
-      console.error('Error downloading report:', error)
-      setError('Failed to download report')
-    }
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-white text-[#000000] p-8">
@@ -200,20 +150,12 @@ export default function ApplicationDetails({ params }: { params: { cid: string; 
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Trainee Profile</h1>
-          <div className="flex gap-4">
-            <button
-              onClick={() => router.push(`/dashboard/club/${params.cid}/applications`)}
-              className="px-4 py-2 bg-[#F5F5F5] text-[#000000] rounded-lg hover:bg-[#E6E6E6] transition-colors"
-            >
-              Back to Applications
-            </button>
-            <button
-              onClick={handleDownloadReport}
-              className="px-4 py-2 bg-[#14D922] text-white rounded-lg hover:bg-[#10B31A] transition-colors"
-            >
-              Download Report
-            </button>
-          </div>
+          <button
+            onClick={() => router.push(`/dashboard/club/${params.cid}/applications`)}
+            className="px-4 py-2 bg-[#F5F5F5] text-[#000000] rounded-lg hover:bg-[#E6E6E6] transition-colors"
+          >
+            Back to Applications
+          </button>
         </div>
 
         <div className="bg-white rounded-lg border border-[#E6E6E6] p-6">
@@ -248,14 +190,14 @@ export default function ApplicationDetails({ params }: { params: { cid: string; 
                   disabled={isSubmitting}
                   className="px-6 py-2 bg-[#14D922] text-white rounded-lg hover:bg-[#10B31A] transition-colors disabled:opacity-50"
                 >
-                  Accept Application
+                  Accept
                 </button>
                 <button
                   onClick={() => handleStatusUpdate('Rejected')}
                   disabled={isSubmitting}
                   className="px-6 py-2 bg-[#F44336] text-white rounded-lg hover:bg-[#D32F2F] transition-colors disabled:opacity-50"
                 >
-                  Reject Application
+                  Reject
                 </button>
               </div>
             </div>
@@ -263,19 +205,55 @@ export default function ApplicationDetails({ params }: { params: { cid: string; 
 
           {application.feedback && (
             <div className="mt-4">
-              <h3 className="text-sm font-medium text-[#555555] mb-2">Previous Feedback</h3>
-              <div className="bg-[#F5F5F5] rounded-lg p-4">
-                <p className="text-[#555555]">{application.feedback}</p>
-              </div>
-            </div>
-          )}
-
-          {error && (
-            <div className="mt-4 p-4 bg-[#F44336]/20 text-[#F44336] rounded-lg">
-              {error}
+              <h3 className="text-sm font-medium text-[#555555]">Feedback</h3>
+              <p className="mt-1 text-[#000000]">{application.feedback}</p>
             </div>
           )}
         </div>
+
+        <div className="mt-8 bg-white rounded-lg border border-[#E6E6E6] p-6">
+          <h2 className="text-xl font-semibold mb-4">Trainee Information</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-sm font-medium text-[#555555]">Name</h3>
+              <p className="mt-1 text-[#000000]">{application.trainee.name}</p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-[#555555]">Preferred Position</h3>
+              <p className="mt-1 text-[#000000]">{application.trainee.preferred_position}</p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-[#555555]">Birth Date</h3>
+              <p className="mt-1 text-[#000000]">
+                {new Date(application.trainee.birth_date).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {application.trainee.test_result && (
+          <div className="mt-8 bg-white rounded-lg border border-[#E6E6E6] p-6">
+            <h2 className="text-xl font-semibold mb-6">Test Results</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Object.entries(application.trainee.test_result).map(([key, value]) => (
+                <div key={key}>
+                  <h3 className="text-sm font-medium text-[#555555] capitalize">
+                    {key.replace(/_/g, ' ')}
+                  </h3>
+                  <div className="mt-2 relative pt-1">
+                    <div className="overflow-hidden h-2 text-xs flex rounded bg-[#E6E6E6]">
+                      <div
+                        style={{ width: `${value}%` }}
+                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-[#14D922]"
+                      />
+                    </div>
+                    <span className="text-xs text-[#555555] mt-1">{value}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
