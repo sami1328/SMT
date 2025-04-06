@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import html2canvas from 'html2canvas'
 
 interface TestResult {
   acceleration: number
@@ -57,6 +56,7 @@ interface PositionResult {
   cb: number
   gk: number
   best_position: string
+  notes: string
 }
 
 interface TraineeProfile {
@@ -250,69 +250,14 @@ export default function TraineeProfile({ params }: { params: { cid: string, id: 
   }
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'bg-[#5DD62C]'; // Bright green
-    if (score >= 70) return 'bg-[#A1D642]'; // Light green
-    if (score >= 60) return 'bg-[#DFDD3C]'; // Yellow-green
-    if (score === 50) return 'bg-[#FFD700]'; // Yellow
-    if (score >= 40) return 'bg-[#FFA500]'; // Orange
-    if (score >= 30) return 'bg-[#FF6B00]'; // Dark orange
-    return 'bg-[#FF0000]'; // Red
+    if (score >= 80) return 'bg-[#5DD62C] text-black' // Bright green
+    if (score >= 70) return 'bg-[#A1D642] text-black' // Light green
+    if (score >= 60) return 'bg-[#DFDD3C] text-black' // Yellow-green
+    if (score === 50) return 'bg-[#FFD700] text-black' // Yellow
+    if (score >= 40) return 'bg-[#FFA500] text-black' // Orange
+    if (score >= 30) return 'bg-[#FF6B00] text-black' // Dark orange
+    return 'bg-[#FF0000] text-white' // Red
   }
-
-  const handleDownloadReport = async () => {
-    try {
-      // Get the pitch visualization element
-      const pitchElement = document.getElementById('pitch-visualization');
-      if (!pitchElement) {
-        console.error('Pitch visualization element not found');
-        return;
-      }
-
-      // Convert the pitch visualization to base64
-      const canvas = await html2canvas(pitchElement);
-      const pitchImage = canvas.toDataURL('image/png');
-
-      // Prepare the data
-      const traineeData = {
-        name: trainee?.name || '',
-        preferred_position: trainee?.preferred_position || '',
-        test_result: trainee?.test_result || {},
-        position_result: trainee?.position_result || {}
-      };
-
-      // Call the API to generate the PDF
-      const response = await fetch('/api/generate-report', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          traineeData,
-          pitchImage
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate PDF');
-      }
-
-      // Get the PDF blob
-      const pdfBlob = await response.blob();
-
-      // Create a download link and trigger the download
-      const url = window.URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `trainee-report-${traineeData.name}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error downloading report:', error);
-      // You might want to show an error message to the user here
-    }
-  };
 
   if (loading) {
     return (
@@ -354,12 +299,6 @@ export default function TraineeProfile({ params }: { params: { cid: string, id: 
               className="px-4 py-2 bg-[#F5F5F5] text-[#000000] rounded-lg hover:bg-[#E6E6E6] transition-colors"
             >
               Back to Dashboard
-            </button>
-            <button
-              onClick={handleDownloadReport}
-              className="px-4 py-2 bg-[#14D922] text-white rounded-lg hover:bg-[#10B31A] transition-colors"
-            >
-              Download Report
             </button>
           </div>
         </div>
@@ -577,6 +516,16 @@ export default function TraineeProfile({ params }: { params: { cid: string, id: 
                       );
                     })}
                 </div>
+              </div>
+            </div>
+
+            {/* AI Analysis Notes */}
+            <div className="bg-white rounded-lg p-6 border border-[#E6E6E6]">
+              <h2 className="text-xl font-semibold mb-4">AI Analysis Notes</h2>
+              <div className="bg-[#F5F5F5] rounded-lg p-4">
+                <p className="text-[#000000] whitespace-pre-wrap">
+                  {trainee.position_result?.notes || 'No analysis notes available.'}
+                </p>
               </div>
             </div>
           </div>

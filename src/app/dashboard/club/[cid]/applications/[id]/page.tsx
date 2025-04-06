@@ -44,6 +44,22 @@ interface Trainee {
     gk_positioning: number
     gk_reflexes: number
   }
+  position_results?: {
+    st: number
+    lw: number
+    rw: number
+    cam: number
+    cm: number
+    cdm: number
+    lm: number
+    rm: number
+    lb: number
+    rb: number
+    cb: number
+    gk: number
+    best_position: string
+    notes: string
+  }
 }
 
 interface Application {
@@ -78,7 +94,8 @@ export default function ApplicationDetails({ params }: { params: { cid: string; 
             name,
             preferred_position,
             birth_date,
-            test_result:test_results(*)
+            test_result:test_results(*),
+            position_results:position_results(*)
           )
         `)
         .eq('id', params.id)
@@ -251,6 +268,44 @@ export default function ApplicationDetails({ params }: { params: { cid: string; 
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {application.trainee.position_results && (
+          <div className="mt-8 bg-white rounded-lg border border-[#E6E6E6] p-6">
+            <h2 className="text-xl font-semibold mb-6">Position Analysis</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Object.entries(application.trainee.position_results)
+                .filter(([key]) => !['id', 'tid', 'best_position', 'notes', 'created_at', 'updated_at'].includes(key))
+                .map(([key, value]) => (
+                  <div key={key}>
+                    <h3 className="text-sm font-medium text-[#555555] capitalize">
+                      {key.toUpperCase()}
+                    </h3>
+                    <div className="mt-2 relative pt-1">
+                      <div className="overflow-hidden h-2 text-xs flex rounded bg-[#E6E6E6]">
+                        <div
+                          style={{ width: `${value}%` }}
+                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-[#14D922]"
+                        />
+                      </div>
+                      <span className="text-xs text-[#555555] mt-1">{value}%</span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+            
+            <div className="mt-6">
+              <h3 className="text-sm font-medium text-[#555555] mb-2">Best Position</h3>
+              <p className="text-[#000000] font-medium">{application.trainee.position_results.best_position}</p>
+            </div>
+
+            <div className="mt-6">
+              <h3 className="text-sm font-medium text-[#555555] mb-2">AI Analysis Notes</h3>
+              <div className="bg-[#F5F5F5] rounded-lg p-4">
+                <p className="text-[#000000] whitespace-pre-wrap">{application.trainee.position_results.notes}</p>
+              </div>
             </div>
           </div>
         )}
