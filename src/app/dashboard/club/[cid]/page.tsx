@@ -340,43 +340,41 @@ export default function ClubDashboard({ params }: { params: { cid: string } }) {
       // Get the application data first to get the trainee_uid
       const { data: applicationData, error: fetchError } = await supabase
         .from('club_applications')
-        .select('trainee_uid')
+        .select(`
+          trainee_uid,
+          trainee:trainees (
+            final_club_id
+          )
+        `)
         .eq('id', applicationId)
         .single()
 
       if (fetchError) throw fetchError
 
-      // Start a transaction by using Promise.all
-      const updatePromises = [
-        // Update application status
-        supabase
-          .from('club_applications')
-          .update({
-            status,
-            feedback: feedback || (status === 'Accepted' ? 'Welcome to the team!' : 'Thank you for your interest.')
-          })
-          .eq('id', applicationId)
-      ]
-
-      // If accepting, update the trainee's final_club_id
-      if (status === 'Accepted') {
-        updatePromises.push(
-          supabase
-            .from('trainees')
-            .update({ final_club_id: params.cid })
-            .eq('tid', applicationData.trainee_uid)
-        )
+      // Check if trainee already has a final club when trying to accept
+      if (status === 'Accepted' && applicationData.trainee?.[0]?.final_club_id) {
+        setError('This trainee has already selected their final club')
+        return
       }
 
-      const results = await Promise.all(updatePromises)
-      const errors = results.map(result => result.error).filter(Boolean)
-      
-      if (errors.length > 0) {
-        throw errors[0]
-      }
+      // Update application status only
+      const { error: updateError } = await supabase
+        .from('club_applications')
+        .update({
+          status,
+          feedback: feedback || (status === 'Accepted' ? 'Application accepted! Waiting for trainee confirmation.' : 'Thank you for your interest.')
+        })
+        .eq('id', applicationId)
+
+      if (updateError) throw updateError
 
       // Refresh applications and team members
       await Promise.all([fetchApplications(), fetchTeamMembers()])
+      
+      // Clear any feedback and selected application
+      setFeedback('')
+      setSelectedApplication(null)
+      setConfirmAction(null)
     } catch (err) {
       console.error('Error updating application status:', err)
       setError('Failed to update application status')

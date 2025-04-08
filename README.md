@@ -1,21 +1,26 @@
-# Scout Management Tool
+# SQAL (SMT)
 
-A Next.js application for scout management.
+A comprehensive platform developed by SMT for managing and evaluating scout activities in Saudi Arabia.
 
-## Deployment to Vercel
+## About The Project
 
-Follow these steps to deploy the project to Vercel:
+SQAL is a modern web application designed to streamline the management and evaluation of scout activities. The platform facilitates interaction between administrators, clubs, and scouters, providing tools for assessment, reporting, and quality assurance.
 
-1. Push your code to a GitHub repository
-2. Log in to [Vercel](https://vercel.com)
-3. Create a new project and select your GitHub repository
-4. Configure the following environment variables in the Vercel dashboard:
-   - `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anon key
-   - `SUPABASE_SERVICE_ROLE_KEY` - Your Supabase service role key
-   - `NEXTAUTH_URL` - The URL of your deployed application (e.g., https://your-app.vercel.app)
-   - `NEXTAUTH_SECRET` - A secure secret for NextAuth (can use the same value as in .env.local)
-5. Deploy the application
+## Key Features
+
+
+- Real-time activity tracking and evaluation
+- Comprehensive dashboard for administrators and clubs
+- Profile management for all users
+- Advanced reporting and analytics
+
+## Technology Stack
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Supabase
 
 ## Local Development
 
@@ -33,48 +38,29 @@ npm run build
 npm start
 ```
 
-## Technologies Used
+## Project Structure
 
-- Next.js 15
-- React 19
-- TypeScript
-- Supabase
-- NextAuth.js
-- Tailwind CSS
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+src/
+├── app/          # Next.js app router pages
+├── components/   # Reusable UI components
+├── lib/         # Utility functions and configurations
+└── types/       # TypeScript type definitions
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository
+2. Create a `.env.local` file in the root directory
+3. Set up the required environment variables
+4. Install dependencies using `npm install`
+5. Start the development server using `npm run dev`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Contributing
 
-## Learn More
+Please contact the project maintainers for contribution guidelines.
+smt4business@gmail.com
 
-To learn more about Next.js, take a look at the following resources:
+## License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+All rights reserved. This project is proprietary and confidential.
