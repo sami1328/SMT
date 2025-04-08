@@ -1,4 +1,4 @@
-# SQAL (SMT)
+# SAQL (SMT)
 
 A comprehensive platform developed by SMT for managing and evaluating scout activities in Saudi Arabia.
 
