@@ -4,7 +4,7 @@ A comprehensive platform developed by SMT for managing and evaluating scout acti
 
 ## About The Project
 
-SQAL is a modern web application designed to streamline the management and evaluation of scout activities. The platform facilitates interaction between administrators, clubs, and scouters, providing tools for assessment, reporting, and quality assurance.
+SAQL is a modern web application designed to streamline the management and evaluation of scout activities. The platform facilitates interaction between administrators, clubs, and scouters, providing tools for assessment, reporting, and quality assurance.
 
 ## Key Features
 
