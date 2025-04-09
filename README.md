@@ -288,7 +288,90 @@ The system consists of four main user roles:
 3. Application build
 4. Deployment to production
 
+## How to Deploy the Project
 
+### Prerequisites
+1. Node.js (v18 or later)
+2. npm or yarn
+3. Supabase account
+4. Vercel account (for hosting)
+
+### Step 1: Environment Setup
+1. Clone the repository:
+   ```bash
+   git clone [repository-url]
+   cd saql
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. Create a `.env.local` file in the root directory with the following variables:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   NEXTAUTH_URL=your_production_url
+   NEXTAUTH_SECRET=your_nextauth_secret
+   ```
+
+### Step 2: Database Setup
+1. Create a new Supabase project
+2. Import the database schema from `supabase11.sql`
+3. Set up Row Level Security (RLS) policies
+4. Configure database backups
+
+### Step 3: Build the Project
+1. Run the build command:
+   ```bash
+   npm run build
+   # or
+   yarn build
+   ```
+
+2. Test the build locally:
+   ```bash
+   npm start
+   # or
+   yarn start
+   ```
+
+### Step 4: Deploy to Production
+1. Push your code to GitHub
+2. Connect your GitHub repository to Vercel
+3. Configure the following in Vercel:
+   - Environment variables
+   - Build settings
+   - Domain settings
+4. Deploy the project
+
+### Step 5: Post-Deployment Checks
+1. Verify all environment variables are set correctly
+2. Test all user roles and permissions
+3. Check database connections
+4. Verify AI integration is working
+5. Test critical workflows:
+   - User registration
+   - Test submission
+   - Club applications
+   - AI analysis
+
+### Step 6: Monitoring Setup
+1. Set up error tracking
+2. Configure performance monitoring
+3. Set up database monitoring
+4. Configure backup verification
+
+### Troubleshooting
+If you encounter issues during deployment:
+1. Check the Vercel deployment logs
+2. Verify environment variables
+3. Check database connections
+4. Review error tracking
+5. Contact support at smt4business@gmail.com
 
 ## Future Work
 1. Enhanced AI analysis capabilities
