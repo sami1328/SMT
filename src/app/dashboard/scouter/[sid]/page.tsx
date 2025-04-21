@@ -46,6 +46,7 @@ interface TestResult {
   gk_kicking: number;
   gk_positioning: number;
   gk_reflexes: number;
+  notes_TR: string;
 }
 
 export default function ScouterDashboard({ params }: { params: { sid: string } }) {
@@ -94,6 +95,7 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
     gk_kicking: 50,
     gk_positioning: 50,
     gk_reflexes: 50,
+    notes_TR: '',
   });
 
   const supabase = createClientComponentClient();
@@ -121,7 +123,8 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
 
   // Filter trainees based on search query, status, and age
   const filteredTrainees = trainees.filter(trainee => {
-    const matchesSearch = trainee.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = trainee.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         trainee.tid.slice(0, 8).toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || trainee.status === statusFilter;
     
     // Calculate age from birth_date
@@ -218,6 +221,7 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
             gk_kicking: testForm.gk_kicking,
             gk_positioning: testForm.gk_positioning,
             gk_reflexes: testForm.gk_reflexes,
+            notes_TR: testForm.notes_TR,
             created_at: new Date().toISOString()
           }
         ])
@@ -282,6 +286,7 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
         gk_kicking: 50,
         gk_positioning: 50,
         gk_reflexes: 50,
+        notes_TR: '',
       });
     } catch (err) {
       console.error('Error submitting test:', err);
@@ -328,7 +333,7 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
         <div className="mb-6 space-y-4">
           <input
             type="text"
-            placeholder="Search trainees by name..."
+            placeholder="Search trainees by name or ID..."
             value={searchQuery}
             onChange={handleSearch}
             className="w-full px-4 py-2 rounded-lg bg-white text-black border border-[#E6E6E6] focus:outline-none focus:border-[#14D922]"
@@ -395,13 +400,13 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                 {currentTrainees.map((trainee) => (
                   <tr key={trainee.tid} className="hover:bg-gray-50">
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-[#555555]">
-                      {trainee.tid}
+                      {trainee.tid.slice(0, 8)}
                     </td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-black">
                       {trainee.name}
                     </td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-[#555555]">
-                      {new Date(trainee.birth_date).toLocaleDateString()}
+                      {Math.floor((new Date().getTime() - new Date(trainee.birth_date).getTime()) / (1000 * 60 * 60 * 24 * 365.25))}
                     </td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm">
                       <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${
@@ -678,6 +683,19 @@ export default function ScouterDashboard({ params }: { params: { sid: string } }
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                {/* Notes Section */}
+                <div className="mb-6 sm:mb-8">
+                  <h3 className="text-base sm:text-lg font-medium text-black mb-4">Additional Notes</h3>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <textarea
+                      value={testForm.notes_TR}
+                      onChange={(e) => setTestForm({ ...testForm, notes_TR: e.target.value })}
+                      placeholder="Enter any additional notes or observations about the trainee..."
+                      className="w-full h-32 px-3 py-2 text-sm text-black bg-white border border-[#E6E6E6] rounded-lg focus:outline-none focus:border-[#14D922] resize-none"
+                    />
                   </div>
                 </div>
 

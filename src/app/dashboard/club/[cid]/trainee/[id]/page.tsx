@@ -40,6 +40,7 @@ interface TestResult {
   gk_kicking: number
   gk_positioning: number
   gk_reflexes: number
+  notes_TR: string
 }
 
 interface PositionResult {
@@ -525,6 +526,16 @@ export default function TraineeProfile({ params }: { params: { cid: string, id: 
               <div className="bg-[#F5F5F5] rounded-lg p-4">
                 <p className="text-[#000000] whitespace-pre-wrap">
                   {trainee.position_result?.notes || 'No analysis notes available.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Scouter Notes */}
+            <div className="bg-white rounded-lg p-6 border border-[#E6E6E6]">
+              <h2 className="text-xl font-semibold mb-4">Scouter Notes</h2>
+              <div className="bg-[#F5F5F5] rounded-lg p-4">
+                <p className="text-[#000000] whitespace-pre-wrap">
+                  {trainee.test_result?.notes_TR || 'No scouter notes available.'}
                 </p>
               </div>
             </div>
